@@ -1,5 +1,5 @@
 Attribute VB_Name = "Módulo2"
-Sub Email_Gen()
+Sub Email_Gen()         'Genera correos de las líneas que contengan certificados caducados.
     
     Dim OutApp As Object
     Dim OutMail As Object
@@ -195,7 +195,7 @@ Sub Email_Gen()
     
 End Sub
 
-Function EXPORT_DATA(nproducto, nombre, material, manufacturer, Destinatario, status)
+Function EXPORT_DATA(nproducto, nombre, material, manufacturer, Destinatario, status)       'Registra la información de los correos generados.
 
     nombre_RecordSheet = ActiveWorkbook.Name
     
@@ -220,7 +220,7 @@ Function EXPORT_DATA(nproducto, nombre, material, manufacturer, Destinatario, st
     Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 9).Value = Date                  'Fecha del último coreo enviado
     
     Workbooks(nombre_bbdd).Sheets("TEMP").Activate                                  'Activamos la BBDD de pedidos para que guarde la info archivada
-    Workbooks(nombre_bbdd).Sheets("TEMP").Range("Z1").Copy Range("J" & i)           'Lista de validación
+    Workbooks(nombre_bbdd).Sheets("AUX2").Range("A1").Copy Range("J" & i)           'Lista de validación
     
     Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 11).Value = status               'Estatus de los TR
        
@@ -229,7 +229,7 @@ Function EXPORT_DATA(nproducto, nombre, material, manufacturer, Destinatario, st
 
 End Function
 
-Function Alarmas(i) As Integer
+Function Alarmas(i) As Integer          'Módulo de comparación de alarmas
     
     Dim Val As Integer
         
@@ -321,7 +321,7 @@ Function Alarmas(i) As Integer
 
 End Function
 
-Function AlarmasX(i) As Integer
+Function AlarmasX(i) As Integer     'Módulo de comparación de alarmas
     
     Dim Val As Integer
         
@@ -413,7 +413,7 @@ Function AlarmasX(i) As Integer
 
 End Function
 
-Function MAYUSCULAS()
+Function MAYUSCULAS()           'Corrige el formato de los campos seleccionados.
     
     Dim Inicioi As Integer
     Dim partnamej As Integer
