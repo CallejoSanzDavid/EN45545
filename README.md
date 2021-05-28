@@ -19,14 +19,55 @@
  
 - PartNameCheck: Código creado a demanda para comprobar inconsistencias entre los Part Names con el mismo Part Number.
 
+-------------------------------------------------- BBDD F&S - VERSIÓN 2.1 -------------------------------------------------
+
+- Cambios mínimos: Comentarios.
+
 ----------------------------------------------- BBDD Contactos - VERSIÓN 1 -----------------------------------------------
 
 - Hoja1: Código para organizar automáticamente la información de contacto de la BBDD de contactos.
 
 - Añadido código en "ThisWorkbook": Se generan dos mensajes al iniciar la BBDD de contactos con instrucciones de como añadir información en la BBDD.
 
------------------------------------------------ BBDD Pedidos - VERSIÓN 1 ----------------------------------------------
+------------------------------------------------- BBDD Pedidos - VERSIÓN 1 -----------------------------------------------
 
 - EnCurso_OK_PorArchivar: Mueve las líneas resueltas desde la hoja "EN CURSO" a "OK".
+
+------------------------------------------------- BBDD Pedidos - VERSIÓN 2 -----------------------------------------------
+Se adapta al nuevo formato prescindiendo de los campos innecesarios. Nuevos módulos añadidos:
+
+- EnCurso_OK_PorArchivar (Actualizado): Añadido condicional para archivar las líneas en "POR ARCHIVAR". Errores corregidos.
+
+- PorArchivar_Archivados: Nuevo código para mover las líneas resueltas de "POR ARCHIVAR" a "ARCHIVADOS".
+
+- Temp_EnCurso: Nuevo código para mover las líneas resueltas de "Temp" a "EN CURSO". 
+  En "Temp" se registran las líneas con la información necesaria para poder hacer el seguimiento de los pedidos de certificados. 
+  Estas líneas se registran mediante el código del módulo EmailGen.
+
+------------------------------------------------- BBDD Pedidos - VERSIÓN 3 -----------------------------------------------
+------------------------------------------------ BBDD Pedidos - VERSIÓN 3.1 ----------------------------------------------
+- Estandarización del código:
+	
+	- Application.ScreenUpdating = False/True: Desactivación de la actualización de pantalla para evitar parpadeos.
+	
+	- SheetName = ActiveSheet.Name: Se registra el nombre de la hoja en la que se ejecuta el código en una variable.
+
+- Reorganización del código para evitar errores.
+
+------------------------------------------------ BBDD Pedidos - VERSIÓN 3.2 ----------------------------------------------
+
+- Cambio del nombre de los módulo para mejor identificación.
+
+- PorArchivar_Archivados: Se busca la línea del Part Number archivado y marca la línea como OK en "EN CURSO".
+
+--------------------------------------------------- BBDD F&S - VERSIÓN 3 --------------------------------------------------
+
+
+
+
+
+
+
+
 
 
