@@ -1,5 +1,5 @@
 Attribute VB_Name = "Módulo1"
-Sub Comprobar_Caducidad()
+Sub Comprobar_Caducidad()           'Comprueba el estado de los certificados.
     
     Dim i As Integer
     Dim j As Integer
@@ -249,7 +249,7 @@ Function Contar_Elem() As Integer
 
 End Function
 
-Function BaseProveedores()
+Function BaseProveedores()      'Busca y registra la información de contacto.
 
     Dim manufj As Integer
     Dim manufacturer As String
