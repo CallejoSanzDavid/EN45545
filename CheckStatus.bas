@@ -22,30 +22,26 @@ Sub Comprobar_Caducidad()           'Comprueba el estado de los certificados.
     Dim statusmin As Integer
     Dim DeclaracionConformidad As Integer
     Dim DeclaracionConformidadj As Integer
-    
-    If Sheets("FCIL").FilterMode Then Sheets("FCIL").ShowAllData
-    
+       
     nj = Sheets("FCIL").Range("A10:DA10").Find("Date * T6").Column
     x = Sheets("FCIL").Range("A10:DA10").Find("Test Method 1 time to expire*").Column
     nprodj = Sheets("FCIL").Range("A10:DA10").Find("Supplier part number").Column
     N = Sheets("FCIL").Cells(Rows.Count, nprodj).End(xlUp).Row
     k = 1
-    G = Sheets("FCIL").Range("A10:DA10").Find("Certificate global status*").Column
     fechaActual = Date
     Aux = Sheets("FCIL").Range("A10:DA10").Find("Assembly Name").Row                'Fila inicial
     DeclaracionConformidadj = Sheets("FCIL").Range("A10:DA10").Find("Manufacturer Declaration Date").Column
         
-    'Call BaseProveedores
+    Sheets("FCIL").Cells(Aux + 1, x).Select
+        
+    If Sheets("FCIL").FilterMode Then Sheets("FCIL").ShowAllData
+        
+    Call BaseProveedores
     
     For i = Sheets("FCIL").Range("A10:DA10").Find("Assembly Name").Row + 1 To N
-        
-        If i = 851 Then
-        
-            Cells(i, "CD").Select
-            
-        End If
-        
+               
         statusmin = 24                                                             'Valores de cadena auxiliares para evitar errores al comparar
+        
         Application.StatusBar = "Checking Certificates Status: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
         
         For j = Sheets("FCIL").Range("A10:DA10").Find("Date * T1").Column To nj Step 6
@@ -57,11 +53,19 @@ Sub Comprobar_Caducidad()           'Comprueba el estado de los certificados.
                 
                 status(k, 0) = 23
                 status(k, 1) = "No date"
+                              
+                If Sheets("FCIL").Cells(i, DeclaracionConformidadj) <> "" And IsDate(Sheets("FCIL").Cells(i, DeclaracionConformidadj)) Then
                 
-                status0 = status(k, 0)
-                status1 = status(k, 1)
+                    Call Comparador_Fechas(i, j, fechaActual, DeclaracionConformidadj, x, k, status, statusmin)
                 
-                Call StatusGlobal(i, G, statusmin, status0, status1)
+                Else
+                
+                    status0 = status(k, 0)
+                    status1 = status(k, 1)
+                    
+                    Call StatusGlobal(i, statusmin, status0, status1)
+                
+                End If
                 
                 If k = 6 Then
                     
@@ -86,12 +90,9 @@ Sub Comprobar_Caducidad()           'Comprueba el estado de los certificados.
                 
             Loop
                             
-            Call Comparador_Fechas
+            status(k, 0) = 24                       'Valores de cadena auxiliares para evitar errores al comparar
             
-            status0 = status(k, 0)
-            status1 = status(k, 1)
-            
-            Call StatusGlobal(i, G, statusmin, status0, status1)
+            Call Comparador_Fechas(i, j, fechaActual, DeclaracionConformidadj, x, k, status, statusmin)
             
             If k = 6 Then
                 
@@ -122,10 +123,19 @@ Sub Comprobar_Caducidad()           'Comprueba el estado de los certificados.
     
 End Sub
 
-Function Comparador_Fechas(i, j, fechaActual, DeclaracionConformidadj, Dif_MesDC, Dif_DiaDC, x, k)
+Function Comparador_Fechas(i, j, fechaActual, DeclaracionConformidadj, x, k, status, statusmin)           'Compara las fechas de los certificados y declaraciones de conformidad y obtiene el estado correcto de la línea.
 
-    Dif_Mes = 60 - DateDiff("m", Sheets("FCIL").Cells(i, j), fechaActual)
-    Dif_Dia = 1827 - DateDiff("d", Sheets("FCIL").Cells(i, j), fechaActual)
+    If Sheets("FCIL").Cells(i, j) <> "" And IsDate(Sheets("FCIL").Cells(i, j)) Then
+    
+        Dif_Mes = 60 - DateDiff("m", Sheets("FCIL").Cells(i, j), fechaActual)
+        Dif_Dia = 1827 - DateDiff("d", Sheets("FCIL").Cells(i, j), fechaActual)
+    
+    Else
+    
+        Dif_Mes = 0
+        Dif_Dia = 0
+        
+    End If
     
     If Sheets("FCIL").Cells(i, DeclaracionConformidadj) <> "" And IsDate(Sheets("FCIL").Cells(i, DeclaracionConformidadj)) Then
     
@@ -139,7 +149,7 @@ Function Comparador_Fechas(i, j, fechaActual, DeclaracionConformidadj, Dif_MesDC
         
     End If
           
-    If Dif_Mes > 6 Or Dif_MesDC > 6 Then                    'Si faltan más de 6 meses para que caduque: OK
+    If CInt(status(k, 0)) <> 23 And (Dif_Mes > 6 Or Dif_MesDC > 6) Then                    'Si faltan más de 6 meses para que caduque: OK
     
         Sheets("FCIL").Cells(i, x) = "OK"
         Sheets("FCIL").Cells(i, x).Interior.ColorIndex = 4  'Verde si es OK
@@ -194,11 +204,18 @@ Function Comparador_Fechas(i, j, fechaActual, DeclaracionConformidadj, Dif_MesDC
         End If
         
     End If
-
+    
+    status0 = CInt(status(k, 0))
+    status1 = status(k, 1)
+    
+    Call StatusGlobal(i, statusmin, status0, status1)
+    
 End Function
 
-Function StatusGlobal(i, G, statusmin, status0, status1)     'Marca el estado global del Part number
+Function StatusGlobal(i, statusmin, status0, status1)     'Marca el estado global del Part number
       
+    G = Sheets("FCIL").Range("A10:DA10").Find("Certificate global status*").Column
+    
     If status0 < statusmin Then
                 
         Sheets("FCIL").Cells(i, G).Value = status1
