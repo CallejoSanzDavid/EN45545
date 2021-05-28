@@ -1,4 +1,4 @@
-Attribute VB_Name = "Módulo4"
+Attribute VB_Name = "ClearFormat_Test"
 Sub Formato_Prueba()                'Limpia los rangos donde actua la macro para comprobar el funcionamiento
 
     Auxi = Sheets("FCIL").Range("A10:DA10").Find("Assembly Name").Row + 1
