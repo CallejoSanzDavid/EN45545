@@ -41,14 +41,12 @@ Se adapta al nuevo formato prescindiendo de los campos innecesarios. Nuevos mód
   Estas líneas se registran mediante el código del módulo EmailGen.
 
 ------------------------------------------------- BBDD Pedidos - VERSIÓN 3 -----------------------------------------------
-
+------------------------------------------------ BBDD Pedidos - VERSIÓN 3.1 ----------------------------------------------
 - Estandarización del código:
 	
 	- Application.ScreenUpdating = False/True: Desactivación de la actualización de pantalla para evitar parpadeos.
 	
 	- SheetName = ActiveSheet.Name: Se registra el nombre de la hoja en la que se ejecuta el código en una variable.
-
------------------------------------------------- BBDD Pedidos - VERSIÓN 3.1 ----------------------------------------------
 
 - Reorganización del código para evitar errores.
 
