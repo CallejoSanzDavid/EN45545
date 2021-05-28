@@ -1,5 +1,5 @@
 Attribute VB_Name = "Módulo1"
-Sub limpieza_bbdd()
+Sub limpieza_bbdd()         'Archiva lineas de "EN CURSO" a "OK" o "POR ARCHIVAR"
     
     Dim inicioi As Integer
     Dim inicioj As Integer
@@ -8,22 +8,32 @@ Sub limpieza_bbdd()
     Dim supplierj As Integer
     Dim estadoj As Integer
     Dim fechaj As Integer
+    Dim inicioPAi As Integer
+    Dim inicioPAj As Integer
+    Dim finalPAi As Integer
+    Dim finalPAj As Integer
     Dim i As Integer
     Dim estado As String
     Dim fechaActual As Date
     Dim Dif_Dia As Integer
     Dim auxfinali As Integer
     
-    inicioi = Sheets("EN CURSO").Range("A1:A10").Find("PART NUMBER").Row            'Posiciones
+    inicioi = Sheets("EN CURSO").Range("A1:A10").Find("PART NUMBER").Row            'Posiciones iniciales "EN CURSO"
     inicioj = Sheets("EN CURSO").Range("A1:Z1").Find("PART NUMBER").Column
     
-    finali = Sheets("EN CURSO").Cells(Rows.Count, inicioj).End(xlUp).Row
+    finali = Sheets("EN CURSO").Cells(Rows.Count, inicioj).End(xlUp).Row            'Posiciones finales "EN CURSO"
     finalj = Sheets("EN CURSO").Cells(inicioi, Columns.Count).End(xlToLeft).Column
     
     supplierj = Sheets("EN CURSO").Range("A1:Z1").Find("SUPPLIER").Column
     
     estadoj = Sheets("EN CURSO").Range(Cells(inicioi, inicioj), Cells(inicioi, finalj)).Find("ESTADO").Column
     fechaj = Sheets("EN CURSO").Range(Cells(inicioi, inicioj), Cells(inicioi, finalj)).Find("FECHA DE ÚLTIMO CORREO ENVIADO").Column
+    
+    inicioPAi = Sheets("POR ARCHIVAR").Range("A1:A10").Find("PART NUMBER").Row              'Posiciones iniciales "POR ARCHIVAR"
+    inicioPAj = Sheets("POR ARCHIVAR").Range("A1:Z1").Find("PART NUMBER").Column
+    
+    finalPAi = Sheets("POR ARCHIVAR").Cells(Rows.Count, inicioj).End(xlUp).Row              'Posiciones finales "POR ARCHIVAR"
+    finalPAj = Sheets("POR ARCHIVAR").Cells(inicioi, Columns.Count).End(xlToLeft).Column
     
     For i = inicioi + 1 To finali
     
@@ -42,23 +52,28 @@ Sub limpieza_bbdd()
                 Cells(auxfinali, "A").Select
                 ActiveSheet.Paste
                 
-                Sheets("EN CURSO").Cells(i, inicioj).EntireRow.Delete
-                i = i - 1
+                ActiveSheet.ListObjects(1).Resize Range(Cells(inicioi, inicioj), Cells(auxfinali, finalj)) 'Ampliamos el rango de la tabla para que añada la nueva línea
                 
                 Sheets("EN CURSO").Activate
                 
+                Sheets("EN CURSO").Cells(i, inicioj).EntireRow.Delete
+                i = i - 1
+                
             End If
             
-            If estado = "POR ARCHIVAR" And Sheets("EN CURSO").Cells(i, finalj + 2) <> 1 Then                       'Cortar y pegar si cumple. En POR ARCHIVAR.
+            If estado = "POR ARCHIVAR" And Sheets("EN CURSO").Cells(i, finalj + 2) <> 1 Then                    'Cortar y pegar si cumple en POR ARCHIVAR.
             
                 Sheets("EN CURSO").Range(Cells(i, inicioj), Cells(i, supplierj)).Copy
-                auxfinali = Sheets("POR ARCHIVAR").Cells(Rows.Count, inicioj).End(xlUp).Row + 1
+                
                 Sheets("POR ARCHIVAR").Activate
+                
+                auxfinali = Sheets("POR ARCHIVAR").Cells(Rows.Count, inicioj).End(xlUp).Row + 1
                 Range("A" & auxfinali).Select
                 ActiveSheet.Paste
                 
-                Sheets("OK").Activate
-                Sheets("OK").Range("Z1").Copy Sheets("POR ARCHIVAR").Range("F" & auxfinali)           'Lista de validación
+                ActiveSheet.ListObjects(1).Resize Range(Cells(inicioPAi, inicioPAj), Cells(auxfinali, finalPAj))      'Ampliamos el rango de la tabla para que añada la nueva línea
+                
+                Sheets("AUX2").Range("C1").Copy Sheets("POR ARCHIVAR").Range("F" & auxfinali)           'Lista de validación "PENDIENTE"
                 
                 Sheets("EN CURSO").Activate
                 
