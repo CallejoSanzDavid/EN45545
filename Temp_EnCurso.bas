@@ -1,4 +1,4 @@
-Attribute VB_Name = "Módulo3"
+Attribute VB_Name = "Temp_EnCurso"
 Sub Nuevos_Pedidos()        'Archiva los nuevos pedidos que están PEDIDOS en "EN CURSO"
     
     Dim inicioi As Integer
