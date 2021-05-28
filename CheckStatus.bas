@@ -288,7 +288,7 @@ Function BaseProveedores()      'Busca y registra la información de contacto.
     Dim m As Integer
     Dim N As Integer
     Dim ContarDB As Integer
-    Dim ContactDB As Integer
+    Dim ContactDBj As Integer
     Dim ContactoDBi As Integer
     Dim supplieri As Integer
     Dim supplierj As Integer
@@ -298,7 +298,7 @@ Function BaseProveedores()      'Busca y registra la información de contacto.
     
     manufj = Sheets("FCIL").Range("A10:DA10").Find("Manufacturer name*").Column
     
-    ContactDB = Sheets("FCIL").Range("A10:DA10").Find("Supplier's Contact").Column
+    ContactDBj = Sheets("FCIL").Range("A10:DA10").Find("Supplier's Contact").Column
     ContactoDBi = Sheets("FCIL").Range("A10:DA10").Find("Supplier's Contact").Row + 1
     supplieri = Sheets("Contacto de proveedores").Range("A1:Z1").Find("Supplier").Row + 1
     supplierj = Sheets("Contacto de proveedores").Range("A1:Z1").Find("Supplier").Column
@@ -314,24 +314,39 @@ Function BaseProveedores()      'Busca y registra la información de contacto.
 
     For m = ContactoDBi To N
         
-        manufacturer = Sheets("FCIL").Cells(m, manufj).Value
-        
         Application.StatusBar = "Updating Supplier's Contact Information: " & m - ContactoDBi + 1 & " of " & N - ContactoDBi + 1 & ": " & Format((m - ContactoDBi + 1) / (N - ContactoDBi + 1), "0%")
+        
+        manufacturer = Sheets("FCIL").Cells(m, manufj).Value
         
         Set c = Range(Sheets("Contacto de proveedores").Cells(supplieri, supplierj), Sheets("Contacto de proveedores").Cells(ContarDB, supplierj)).Find(manufacturer)
         
         If c Is Nothing Then
-                
-            Sheets("FCIL").Cells(m, ContactDB) = "Does NOT Exist"
-            Sheets("FCIL").Cells(m, ContactDB).Interior.ColorIndex = 3
-              
+        
+            Sheets("FCIL").Cells(m, ContactDBj) = "Does NOT Exist"
+            Sheets("FCIL").Cells(m, ContactDBj).Interior.ColorIndex = 3
+        
+            linea = 0
+            
         Else
         
             linea = c.Row
-                     
-            Sheets("FCIL").Cells(m, ContactDB) = Sheets("Contacto de proveedores").Cells(linea, mailj)
-            Sheets("FCIL").Cells(m, ContactDB).Interior.ColorIndex = 43
+            
+            If Sheets("Contacto de proveedores").Cells(linea, mailj) = "" Then
+            
+                Sheets("FCIL").Cells(m, ContactDBj) = "Does NOT Exist"
+                Sheets("FCIL").Cells(m, ContactDBj).Interior.ColorIndex = 3
+                
+                linea = 0
+                
+            End If
+            
+        End If
         
+        If linea <> 0 Then
+                
+            Sheets("FCIL").Cells(m, ContactDBj) = Sheets("Contacto de proveedores").Cells(linea, mailj)
+            Sheets("FCIL").Cells(m, ContactDBj).Interior.ColorIndex = 43
+             
         End If
         
     Next
@@ -339,4 +354,3 @@ Function BaseProveedores()      'Busca y registra la información de contacto.
     Application.StatusBar = ""
     
 End Function
-
