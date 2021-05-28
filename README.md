@@ -9,4 +9,8 @@
  - EmailGen: Generación de emails automáticamente para las lineas en las que algún certificado haya expirado o expire en los próximos 6 meses. 
    Los correos se generan con un lista con información todos los Part Numbers que necesitan nuevos certificados para cada proveedor.
  
+-----------------------------------------------VERSIÓN 2.1-----------------------------------------------
+
+ - Añadido código en "ThisWorkbook" para generar una MsgBox al iniciar la BBDD. Corre el módulo CheckStatus.
  
+ - 
