@@ -1,16 +1,13 @@
 Attribute VB_Name = "Módulo3"
-Sub Nuevos_Pedidos()
+Sub Nuevos_Pedidos()        'Archiva los nuevos pedidos que están PEDIDOS en "EN CURSO"
     
     Dim inicioi As Integer
     Dim inicioj As Integer
     Dim finali As Integer
     Dim finalj As Integer
     Dim estadoj As Integer
-    Dim fechaj As Integer
     Dim i As Integer
     Dim estado As String
-    Dim fechaActual As Date
-    Dim Dif_Dia As Integer
     Dim auxfinali As Integer
     
     inicioi = Sheets("TEMP").Range("A1:A10").Find("PART NUMBER").Row            'Posiciones
@@ -28,18 +25,24 @@ Sub Nuevos_Pedidos()
         If estado = "PEDIDO" Then          'Cortar y pegar si cumple
                 
             Sheets("TEMP").Range(Cells(i, inicioj), Cells(i, finalj)).Cut
-            auxfinali = Sheets("EN CURSO").Cells(Rows.Count, estadoj).End(xlUp).Row + 1
+            
             Sheets("EN CURSO").Activate
+            auxfinali = Sheets("EN CURSO").Cells(Rows.Count, estadoj).End(xlUp).Row + 1
             Cells(auxfinali, "A").Select
             ActiveSheet.Paste
             
-            Sheets("TEMP").Cells(i, inicioj).EntireRow.Delete
-            i = i - 1
+            ActiveSheet.ListObjects(1).Resize Range(Cells(inicioi, inicioj), Cells(auxfinali, finalj)) 'Ampliamos el rango de la tabla para que añada la nueva línea
             
             Sheets("TEMP").Activate
+            
+            Sheets("TEMP").Cells(i, inicioj).EntireRow.Delete
+            i = i - 1
             
         End If
     
     Next
     
 End Sub
+
+
+
