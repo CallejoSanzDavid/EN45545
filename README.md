@@ -46,6 +46,7 @@ Se adapta al nuevo formato prescindiendo de los campos innecesarios. Nuevos mód
 
 ------------------------------------------------- BBDD Pedidos - VERSIÓN 3 -----------------------------------------------
 ------------------------------------------------ BBDD Pedidos - VERSIÓN 3.1 ----------------------------------------------
+
 - Estandarización del código:
 	
 	- Application.ScreenUpdating = False/True: Desactivación de la actualización de pantalla para evitar parpadeos.
@@ -61,6 +62,42 @@ Se adapta al nuevo formato prescindiendo de los campos innecesarios. Nuevos mód
 - PorArchivar_Archivados: Se busca la línea del Part Number archivado y marca la línea como OK en "EN CURSO".
 
 --------------------------------------------------- BBDD F&S - VERSIÓN 3 --------------------------------------------------
+
+- Eliminación del mensaje al inicio al haber recibido observaciones de los usuarios de que al abrir el archivo han actualizado la Info sin querer 
+  y han tenido que esperar a que terminara el proceso para consultar información.
+  
+- Cambiadas de posición las columnas “Comments / Remarks” (CB) y “Manufacturer Declaration Date” (CA) para mantener el formato con la plantilla original.
+  Esto es necesario para la nueva tool de corrección de FCILs.
+
+- CheckStatus: Modificación masiva de código.
+	- Correcciones en el código de “COMPROBAR CADUCIDAD”. Error de rellenado del estado, no tenía en cuenta la fecha de las declaraciones de conformidad en el estado global.
+	- Función Contar_Elem_DB() eliminada por ser innecesaria.
+	- Función Contar_Elem() eliminada por ser innecesaria.
+	- Comparador_Fechas() para optimizar el código.
+	- Añadida función StatusGlobal() para optimizar el código.
+	- Optimización del código para reducir tiempos de procesado.
+	- Corrección de error en caso de que se active la macro con una celda pulsada fuera de la tabla.
+
+- EmailGen: Eliminada función ContarElem() por ser innecesaria.
+
+-------------------------------------------------- BBDD F&S - VERSIÓN 3.1 -------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
