@@ -96,11 +96,11 @@ Cambios en EmailGen.
 	- Optimización del código para mayor velocidad de computación.
 
 -------------------------------------------------- BBDD F&S - VERSIÓN 3.3 -------------------------------------------------
+Cambios en CheckStatus.
 
+- Corrección de error de funcionamiento en la función que busca la información de contacto.
 
-
-
-
+--------------------------------------------------- BBDD F&S - VERSIÓN 4 --------------------------------------------------
 
 
 
