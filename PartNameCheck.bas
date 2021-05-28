@@ -1,7 +1,8 @@
 Attribute VB_Name = "Módulo3"
 Sub ODD1OUT()               'Este código encuentra inconsistencias en los Part Names
 
-    N = Contar_Elem
+    nprodj = Sheets("FCIL").Range("A10:DA10").Find("Supplier part number").Column
+    N = Sheets("FCIL").Cells(Rows.Count, nprodj).End(xlUp).Row
     
     For i = Sheets("FCIL").Range("M1:M15").Find("Assembly Name").Row + 1 To N
               
