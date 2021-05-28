@@ -82,10 +82,11 @@ Se adapta al nuevo formato prescindiendo de los campos innecesarios. Nuevos mód
 
 -------------------------------------------------- BBDD F&S - VERSIÓN 3.1 -------------------------------------------------
 
+- CheckStatus: Reestructuración de código.
 
+- Nuevo módulo: ClearFormat_Test: Limpia los rangos de celdas para facilitar el testeo del código
 
-
-
+-------------------------------------------------- BBDD F&S - VERSIÓN 3.2 -------------------------------------------------
 
 
 
