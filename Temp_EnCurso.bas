@@ -10,6 +10,8 @@ Sub Nuevos_Pedidos()        'Archiva los nuevos pedidos que están PEDIDOS en "EN
     Dim estado As String
     Dim auxfinali As Integer
     
+    Application.ScreenUpdating = False
+    
     inicioi = Sheets("TEMP").Range("A1:A10").Find("PART NUMBER").Row            'Posiciones
     inicioj = Sheets("TEMP").Range("A1:A10").Find("PART NUMBER").Column
     
@@ -41,6 +43,8 @@ Sub Nuevos_Pedidos()        'Archiva los nuevos pedidos que están PEDIDOS en "EN
         End If
     
     Next
+    
+    Application.ScreenUpdating = True
     
 End Sub
 
