@@ -1,4 +1,4 @@
-Attribute VB_Name = "Módulo3"
+Attribute VB_Name = "PartNameCheck"
 Sub ODD1OUT()               'Este código encuentra inconsistencias en los Part Names
 
     nprodj = Sheets("FCIL").Range("A10:DA10").Find("Supplier part number").Column
