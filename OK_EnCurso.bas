@@ -1,4 +1,4 @@
-Attribute VB_Name = "Módulo4"
+Attribute VB_Name = "OK_EnCurso"
 Sub DESHACER()  'Devuelve lineas que estaban en "OK" a "EN CURSO".
 
     Dim inicioi As Integer
