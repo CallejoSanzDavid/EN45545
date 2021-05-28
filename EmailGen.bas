@@ -29,48 +29,64 @@ Sub Email_Gen()         'Genera correos de las líneas que contengan certificados
     Dim ncorreos As Integer
     Dim nsincontacto As Integer
     Dim Aux As Integer
-    
-    If Sheets("FCIL").FilterMode Then Sheets("FCIL").ShowAllData
-    
+    Dim Val As Integer
+        
     Call MAYUSCULAS
+    
+    'Localizamos las posiciones en el FCIL
     
     G = Sheets("FCIL").Range("A10:DA10").Find("Certificate global status*").Column
     nprodj = Sheets("FCIL").Range("A10:DA10").Find("Supplier part number").Column
+    Aux = Sheets("FCIL").Range("A10:DA10").Find("Assembly Name").Row
     N = Sheets("FCIL").Cells(Rows.Count, nprodj).End(xlUp).Row
+    
+    nombj = Sheets("FCIL").Range("A10:DA10").Find("Part name").Column
+    matj = Sheets("FCIL").Range("A10:DA10").Find("Raw material or product name*").Column
+    manufj = Sheets("FCIL").Range("A10:DA10").Find("Manufacturer name*").Column
+    contactj = Sheets("FCIL").Range("A10:DA10").Find("Supplier's Contact").Column
+    
+    Sheets("FCIL").Cells(Aux + 1, G).Select
+        
+    If Sheets("FCIL").FilterMode Then Sheets("FCIL").ShowAllData
+            
+    'Localizamos posiciones en la hoja de Contacto de proveedores
+            
+    CPsupplierj = Sheets("Contacto de proveedores").Range("A1:J1").Find("Supplier").Column
+    CPendi = Sheets("Contacto de proveedores").Cells(Rows.Count, CPsupplierj).End(xlUp).Row
+    CPmailj = Sheets("Contacto de proveedores").Range("A1:J1").Find("Mail").Column
+    
+    Firma = "MERAK Spain, S.A." + vbCrLf + "Miguel Faraday, 1" + vbCrLf + "Parque Empresarial 'La Carpetania'" + vbCrLf + "28906 Getafe (Madrid)" + vbCrLf + "mailto: f&s@merak-hvac.com"
+    Separacion = "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" + vbCrLf + vbCrLf
     
     ncorreos = 0
     nsincontacto = 0
     
-    Aux = Sheets("FCIL").Range("A10:DA10").Find("Assembly Name").Row
-    
     For i = Sheets("FCIL").Range("A10:DA10").Find("Assembly Name").Row + 1 To N
         
-        validacion = Alarmas(i)
-        statusmin = AlarmasX(i)
+        Application.StatusBar = "Checking expired certificates and generating emails: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
+        
+        Val = Sheets("FCIL").Range("A10:DA10").Find("Email Sended").Column
+        validacion = Alarmas(i, Val)
+        
+        Val = G
+        statusmin = Alarmas(i, Val)
+        
         Export = 0
     
-        If Sheets("FCIL").Cells(i, G).Value <> "OK" And Sheets("FCIL").Cells(i, G).Value <> "No date" And validacion > statusmin Then
+        If statusmin <= 21 And validacion > statusmin Then
         
             status = Sheets("FCIL").Cells(i, G)
             statusES = Split(status, " ")
             
-            nprodj = Sheets("FCIL").Range("A10:DA10").Find("Supplier part number").Column
             nproducto = Sheets("FCIL").Cells(i, nprodj).Value
             
-            nombj = Sheets("FCIL").Range("A10:DA10").Find("Part name").Column
             auxname = Split(Cells(i, nombj).Value, " - MATERIAL")
             nombre = auxname(0)
             
-            matj = Sheets("FCIL").Range("A10:DA10").Find("Raw material or product name*").Column
             material = Sheets("FCIL").Cells(i, matj).Value
             
-            manufj = Sheets("FCIL").Range("A10:DA10").Find("Manufacturer name*").Column
             manufacturer = Sheets("FCIL").Cells(i, manufj).Value
             
-            Firma = "MERAK Spain, S.A." + vbCrLf + "Miguel Faraday, 1" + vbCrLf + "Parque Empresarial 'La Carpetania'" + vbCrLf + "28906 Getafe (Madrid)" + vbCrLf + "mailto: f&s@merak-hvac.com"
-            Separacion = "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" + vbCrLf + vbCrLf
-            
-            contactj = Sheets("FCIL").Range("A10:DA10").Find("Supplier's Contact").Column
             Destinatario = Sheets("FCIL").Cells(i, contactj).Value
             
             If Destinatario = "Does NOT Exist" Then
@@ -78,14 +94,7 @@ Sub Email_Gen()         'Genera correos de las líneas que contengan certificados
                 nsincontacto = nsincontacto + 1
                
             End If
-            
-            'Localizamos posiciones en la hoja de Contacto de proveedores
-            
-            CPsupplierj = Sheets("Contacto de proveedores").Range("A1:J1").Find("Supplier").Column
-            CPendi = Sheets("Contacto de proveedores").Cells(Rows.Count, CPsupplierj).End(xlUp).Row
-            
-            CPmailj = Sheets("Contacto de proveedores").Range("A1:J1").Find("Mail").Column
-            
+                       
             Sheets("Contacto de proveedores").Activate   'Para evitar que la siguiente línea de un error activamos la hoja donde tiene que buscar.
             CPmaili = Sheets("Contacto de proveedores").Range(Cells(1, CPmailj), Cells(CPendi, CPmailj)).Find(Destinatario).Row
             
@@ -185,8 +194,6 @@ Sub Email_Gen()         'Genera correos de las líneas que contengan certificados
             Call EXPORT_DATA(nproducto, nombre, material, manufacturer, Destinatario, status)
         
         End If
-        
-        Application.StatusBar = "Checking expired certificates and generating emails: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
 
     Next
     
@@ -230,17 +237,21 @@ Function EXPORT_DATA(nproducto, nombre, material, manufacturer, Destinatario, st
 
 End Function
 
-Function Alarmas(i) As Integer          'Módulo de comparación de alarmas
+Function Alarmas(i, Val) As Integer          'Módulo de comparación de alarmas
     
-    Dim Val As Integer
-        
-    Val = Sheets("FCIL").Range("A10:DA10").Find("Email Sended").Column
-    
-    If Sheets("FCIL").Cells(i, Val) = "---" Then
+    If Sheets("FCIL").Cells(i, Val) = "---" Or Sheets("FCIL").Cells(i, Val) = "PRIORITY" Or Sheets("FCIL").Cells(i, Val) = "" Then
         Alarmas = 24
     End If
+       
+    If Sheets("FCIL").Cells(i, Val) = "No date" Then
+        Alarmas = 23
+    End If
+       
+    If Sheets("FCIL").Cells(i, Val) = "OK" Then
+        Alarmas = 22
+    End If
     
-    If Sheets("FCIL").Cells(i, Val) = "6 month/s" Then
+    If Sheets("FCIL").Cells(i, Val) = "6 month/s" Or Sheets("FCIL").Cells(i, Val) = "5 month/s" Or Sheets("FCIL").Cells(i, Val) = "4 month/s" Then
         Alarmas = 21
     End If
     
@@ -316,100 +327,8 @@ Function Alarmas(i) As Integer          'Módulo de comparación de alarmas
         Alarmas = 1
     End If
     
-    If Sheets("FCIL").Cells(i, Val) = "PRIORITY" Then
-        Alarmas = 24
-    End If
-
-End Function
-
-Function AlarmasX(i) As Integer     'Módulo de comparación de alarmas
-    
-    Dim Val As Integer
-        
-    Val = Sheets("FCIL").Range("A10:DA10").Find("Certificate global status").Column
-    
-    If Sheets("FCIL").Cells(i, Val) = "OK" Then
-        AlarmasX = 24
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "6 month/s" Or Sheets("FCIL").Cells(i, Val) = "5 month/s" Or Sheets("FCIL").Cells(i, Val) = "4 month/s" Then
-        AlarmasX = 21
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "3 month/s" Then
-        AlarmasX = 18
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "2 month/s" Then
-        AlarmasX = 17
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "1 month/s" Then
-        AlarmasX = 16
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "15 day/s" Then
-        AlarmasX = 15
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "14 day/s" Then
-        AlarmasX = 14
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "13 day/s" Then
-        AlarmasX = 13
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "12 day/s" Then
-        AlarmasX = 12
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "11 day/s" Then
-        AlarmasX = 11
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "10 day/s" Then
-        AlarmasX = 10
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "9 day/s" Then
-        AlarmasX = 9
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "8 day/s" Then
-        AlarmasX = 8
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "7 day/s" Then
-        AlarmasX = 7
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "6 day/s" Then
-        AlarmasX = 6
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "5 day/s" Then
-        AlarmasX = 5
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "4 day/s" Then
-        AlarmasX = 4
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "3 day/s" Then
-        AlarmasX = 3
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "2 day/s" Then
-        AlarmasX = 2
-    End If
-    
-    If Sheets("FCIL").Cells(i, Val) = "1 day/s" Then
-        AlarmasX = 1
-    End If
-    
     If Sheets("FCIL").Cells(i, Val) = "EXPIRED" Then
-        AlarmasX = 0
+        Alarmas = 0
     End If
 
 End Function
@@ -455,4 +374,5 @@ Function MAYUSCULAS()           'Corrige el formato de los campos seleccionados.
     Application.StatusBar = ""
 
 End Function
+
 
