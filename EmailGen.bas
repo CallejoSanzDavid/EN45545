@@ -35,7 +35,8 @@ Sub Email_Gen()         'Genera correos de las líneas que contengan certificados
     Call MAYUSCULAS
     
     G = Sheets("FCIL").Range("A10:DA10").Find("Certificate global status*").Column
-    N = Contar_Elem
+    nprodj = Sheets("FCIL").Range("A10:DA10").Find("Supplier part number").Column
+    N = Sheets("FCIL").Cells(Rows.Count, nprodj).End(xlUp).Row
     
     ncorreos = 0
     nsincontacto = 0
@@ -427,7 +428,8 @@ Function MAYUSCULAS()           'Corrige el formato de los campos seleccionados.
     
     Aux = Sheets("FCIL").Range("A10:DA10").Find("Assembly Name").Row
     
-    N = Contar_Elem
+    nprodj = Sheets("FCIL").Range("A10:DA10").Find("Supplier part number").Column
+    N = Sheets("FCIL").Cells(Rows.Count, nprodj).End(xlUp).Row
     
     For Inicioi = Sheets("FCIL").Range("A10:Z10").Find("Supplier").Row + 1 To N
         
