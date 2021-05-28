@@ -1,4 +1,4 @@
-Attribute VB_Name = "Módulo1"
+Attribute VB_Name = "CheckStatus"
 Sub Comprobar_Caducidad()           'Comprueba el estado de los certificados.
     
     Dim i As Integer
