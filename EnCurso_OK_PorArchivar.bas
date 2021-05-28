@@ -18,6 +18,8 @@ Sub limpieza_bbdd()         'Archiva lineas de "EN CURSO" a "OK" o "POR ARCHIVAR
     Dim Dif_Dia As Integer
     Dim auxfinali As Integer
     
+    Application.ScreenUpdating = False
+    
     inicioi = Sheets("EN CURSO").Range("A1:A10").Find("PART NUMBER").Row            'Posiciones iniciales "EN CURSO"
     inicioj = Sheets("EN CURSO").Range("A1:Z1").Find("PART NUMBER").Column
     
@@ -61,7 +63,7 @@ Sub limpieza_bbdd()         'Archiva lineas de "EN CURSO" a "OK" o "POR ARCHIVAR
                 
             End If
             
-            If estado = "POR ARCHIVAR" And Sheets("EN CURSO").Cells(i, finalj + 2) <> 1 Then                    'Cortar y pegar si cumple en POR ARCHIVAR.
+            If estado = "POR ARCHIVAR" And Sheets("EN CURSO").Cells(i, finalj + 2) <> 1 Then                    'Copiar y pegar si cumple en POR ARCHIVAR.
             
                 Sheets("EN CURSO").Range(Cells(i, inicioj), Cells(i, supplierj)).Copy
                 
@@ -84,6 +86,8 @@ Sub limpieza_bbdd()         'Archiva lineas de "EN CURSO" a "OK" o "POR ARCHIVAR
         End If
     
     Next
+    
+    Application.ScreenUpdating = True
     
 End Sub
 
