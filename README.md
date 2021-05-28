@@ -27,4 +27,6 @@
 
 ----------------------------------------------- BBDD Pedidos - VERSIÓN 1 ----------------------------------------------
 
-- 
+- EnCurso_OK_PorArchivar: Mueve las líneas resueltas desde la hoja "EN CURSO" a "OK".
+
+
