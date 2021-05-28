@@ -101,6 +101,22 @@ Cambios en CheckStatus.
 - Corrección de error de funcionamiento en la función que busca la información de contacto.
 
 --------------------------------------------------- BBDD F&S - VERSIÓN 4 --------------------------------------------------
+Cambio de la filosofía de programación. Funciones cortas y eficientes.
+Todos los módulos renombrados para facilitar su identificación.
+
+-EmailGen:
+	- Cambio de los nombre de los módulos para ser más descriptivos.
+	- Estandarización del código mediante la línea: SheetName = ActiveSheet.Name.
+	- Optimizado código de función Alarmas mediante Select Case.
+	- Cambiados los rangos de busqueda para los identificadores de filas y columnas. Estandarización y optimización.
+	- Los correos solo añaden información de los los materiales cuyos certificados están expirados o a punto de expirar.
+	- Public funtion de filtros.
+	- Cambio de modo de programación: Funciones cortas y eficientes.
+
+- Filters: Nuevo módulo estándar para aplicar filtros.
+
+- GlobalEntities: Inicialización de entidades globales.
+
 
 
 
