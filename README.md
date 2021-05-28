@@ -81,15 +81,21 @@ Se adapta al nuevo formato prescindiendo de los campos innecesarios. Nuevos mód
 - EmailGen: Eliminada función ContarElem() por ser innecesaria.
 
 -------------------------------------------------- BBDD F&S - VERSIÓN 3.1 -------------------------------------------------
+Cambios en CheckStatus.
 
 - CheckStatus: Reestructuración de código.
 
 - Nuevo módulo: ClearFormat_Test: Limpia los rangos de celdas para facilitar el testeo del código
 
 -------------------------------------------------- BBDD F&S - VERSIÓN 3.2 -------------------------------------------------
+Cambios en EmailGen.
 
+- EmailGen:
+	- Unificadas las funciones Alarmas() y AlarmasX() ya que tenían una estructura muy parecida y es innecesario tener dos funciones que hacen lo mismo.
+	- Líneas de código reorganizadas para evitar repeticiones innecesarias.
+	- Optimización del código para mayor velocidad de computación.
 
-
+-------------------------------------------------- BBDD F&S - VERSIÓN 3.3 -------------------------------------------------
 
 
 
