@@ -46,6 +46,7 @@ Sub Email_Gen()
         
         validacion = Alarmas(i)
         statusmin = AlarmasX(i)
+        Export = 0
     
         If Sheets("FCIL").Cells(i, G).Value <> "OK" And Sheets("FCIL").Cells(i, G).Value <> "No date" And validacion > statusmin Then
         
@@ -125,6 +126,7 @@ Sub Email_Gen()
                     .Display
                     
                     ncorreos = ncorreos + 1
+                    Export = 1
                     
                 End With
             
@@ -169,14 +171,21 @@ Sub Email_Gen()
                     .Display
             
                     ncorreos = ncorreos + 1
-            
+                    Export = 1
+                    
                 End With
                 
             End If
     
         End If
-    
-    Application.StatusBar = "Checking expired certificates and generating emails: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
+        
+        If Export = 1 Then
+        
+            Call EXPORT_DATA(nproducto, nombre, material, manufacturer, Destinatario, status)
+        
+        End If
+        
+        Application.StatusBar = "Checking expired certificates and generating emails: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
 
     Next
     
@@ -185,6 +194,40 @@ Sub Email_Gen()
     Application.StatusBar = ""
     
 End Sub
+
+Function EXPORT_DATA(nproducto, nombre, material, manufacturer, Destinatario, status)
+
+    nombre_RecordSheet = ActiveWorkbook.Name
+    
+    Workbooks.Open (Sheets("Listas de Validación").Range("G2").Value)
+    
+    nombre_bbdd = ActiveWorkbook.Name
+    
+    Workbooks(nombre_bbdd).Sheets("TEMP").Activate          'Activamos el libro en la hoja de registro
+    
+    i = ActiveSheet.Cells(Rows.Count, "B").End(xlUp).Row + 1            'Localizamos la última fila con info en una columna sin celdas combinadas
+    
+    Workbooks(nombre_RecordSheet).Activate          'Activamos la BBDD F&H para extraer la info de esta
+    
+    Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 1).Value = nproducto             'Part Number
+    Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 2).Value = nombre                'Part Name
+    Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 3).Value = material              'Raw Material
+    Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 4).Value = manufacturer          'Supplier
+    Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 5).Value = "---"                 'TR number
+    Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 6).Value = Destinatario          'Contact e-mails
+    Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 7).Value = "BB.DD."              'Quien lo pide
+    Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 8).Value = Date                  'Cuando se ha pedido
+    Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 9).Value = Date                  'Fecha del último coreo enviado
+    
+    Workbooks(nombre_bbdd).Sheets("TEMP").Activate                                  'Activamos la BBDD de pedidos para que guarde la info archivada
+    Workbooks(nombre_bbdd).Sheets("TEMP").Range("Z1").Copy Range("J" & i)           'Lista de validación
+    
+    Workbooks(nombre_bbdd).Sheets("TEMP").Cells(i, 11).Value = status               'Estatus de los TR
+       
+    ActiveWorkbook.Save
+    ActiveWorkbook.Close
+
+End Function
 
 Function Alarmas(i) As Integer
     
@@ -408,7 +451,7 @@ Function MAYUSCULAS()
     Next
     
     Application.StatusBar = ""
-    
+
 End Function
 
 
