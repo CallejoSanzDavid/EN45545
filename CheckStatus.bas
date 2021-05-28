@@ -339,3 +339,4 @@ Function BaseProveedores()      'Busca y registra la información de contacto.
     Application.StatusBar = ""
     
 End Function
+
