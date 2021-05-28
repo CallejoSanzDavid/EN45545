@@ -1,5 +1,5 @@
-Attribute VB_Name = "Módulo2"
-Sub ARCHIVADOS()            'Archiva las lineas que están OK de Nombre_Origen a "ARCHIVADOS". Actualiza el estado de la linea archivada en "EN CURSO" -> OK
+Attribute VB_Name = "PorArchivar_Archivados"
+Sub ARCHIVADOS()            'Archiva las lineas que están OK de "Por Archivar" a "ARCHIVADOS". Actualiza el estado de la linea archivada en "EN CURSO" -> OK
     
     Dim inicioi As Integer
     Dim inicioj As Integer
@@ -16,7 +16,6 @@ Sub ARCHIVADOS()            'Archiva las lineas que están OK de Nombre_Origen a 
     Dim fechaActual As Date
     Dim Dif_Dia As Integer
     Dim auxfinali As Integer
-    Dim auxpartnumberi As Integer
     Dim partnumber As String
     
     Application.ScreenUpdating = False
@@ -50,8 +49,13 @@ Sub ARCHIVADOS()            'Archiva las lineas que están OK de Nombre_Origen a 
                      
             Sheets("EN CURSO").Activate
             
-            auxpartnumberi = Sheets("EN CURSO").Range(Cells(inicioECi, inicioECj), Cells(finalECi, inicioECj)).Find(partnumber).Row
-            Sheets("AUX2").Range("B1").Copy Sheets("EN CURSO").Range("J" & auxpartnumberi)           'Lista de validación "OK"
+            Set c = Range(Sheets("EN CURSO").Cells(inicioECi, inicioECj), Sheets("EN CURSO").Cells(finalECi, inicioECj)).Find(partnumber)
+    
+            If Not c Is Nothing Then
+                
+                Sheets("AUX2").Range("B1").Copy Sheets("EN CURSO").Range("J" & c.Row)           'Lista de validación "OK"
+                
+            End If
             
             Sheets(Nombre_Origen).Activate
             
