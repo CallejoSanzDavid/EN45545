@@ -1,4 +1,4 @@
-Attribute VB_Name = "Módulo1"
+Attribute VB_Name = "EnCurso_OK_PorArchivar"
 Sub limpieza_bbdd()         'Archiva lineas de "EN CURSO" a "OK" o "POR ARCHIVAR"
     
     Dim inicioi As Integer
