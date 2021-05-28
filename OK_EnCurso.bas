@@ -11,6 +11,8 @@ Sub DESHACER()  'Devuelve lineas que estaban en "OK" a "EN CURSO".
     Dim estado As String
     Dim auxfinali As Integer
     
+    Application.ScreenUpdating = False
+    
     inicioi = Sheets("OK").Range("A1:A10").Find("PART NUMBER").Row            'Posiciones
     inicioj = Sheets("OK").Range("A1:A10").Find("PART NUMBER").Column
     
@@ -50,6 +52,7 @@ Sub DESHACER()  'Devuelve lineas que estaban en "OK" a "EN CURSO".
         
     Next
 
-
+    Application.ScreenUpdating = True
+    
 End Sub
 
