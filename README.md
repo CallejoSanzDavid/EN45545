@@ -117,8 +117,21 @@ Todos los módulos renombrados para facilitar su identificación.
 
 - GlobalEntities: Inicialización de entidades globales.
 
+--------------------------------------------------- BBDD F&S - VERSIÓN 5 --------------------------------------------------
+Adaptación del código InfoProveedores_SAP de “BOM Check REACH format Data Base V1.1.xlsm”.
 
+- Variables en “GlobalEntities” organizadas.
 
+- Renombrado de funciones a Inglés con el formato “Function_Name”.
+- Traducidos los comentarios en Inglés.
+
+- CheckStatus:
+	- Nueva función: NoDate(). Función que se invoca cuando no hay fecha para un ensayo.
+	- Nueva función: CountersCheck(). Checkea y actualiza el estado de los contadores de los bucles.
+	- Cambio de Nombres de variables para hacer el código más comprensible. Por ejemplo: G por GlobalStatusj.
+	- Eliminada cadena status(6,1) por ser innecesaria. Por lo que podemos prescindir del valor k.
+	- Check_Contacts reestructurado.
+	
 
 
 
