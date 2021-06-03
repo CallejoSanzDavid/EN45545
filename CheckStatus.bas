@@ -28,9 +28,10 @@ Sub Check_Status()           'Comprueba el estado de los certificados.
     For i = Aux + 1 To N
             
         'STOP<----------------------------------
-        'Error: Test Method 5 se registra incorrectamente. "0 month/s", pero no tiene fecha.
-        i = 156
-            
+        'Error: No se registra el estado global cuando los TR son "No Date".
+        'i = 370
+        'Sheets(SheetName).Cells(i, TMexpirej).Select
+        
         statusmin = 24              'Auxiliar value to prevent bugs in the comparisons
         
         Application.StatusBar = "Checking Certificates Status: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
@@ -41,18 +42,18 @@ Sub Check_Status()           'Comprueba el estado de los certificados.
             status0 = 24            'Auxiliar value to prevent bugs in the comparisons
             
             If IsDate(Sheets(SheetName).Cells(i, DateT1j)) = False Then                   'Error: Cell with no date.
-
+'STOP
                 No_Date_flag = No_Date(i, DateT1j, DateT6j, TMexpirej, status0, statusmin)
                 Exit For            'Salir del for al terminar la función ¿?
             
             End If
                             
             If No_Date_flag = 0 Then
-
-                Call Check_Dates(i, DateT1j, Current_Date, ManufDeclarationj, TMexpirej, status0, statusmin)
+'STOP
+                Call Identify_Status(i, DateT1j, Current_Date, ManufDeclarationj, TMexpirej, status0, statusmin)
             
             End If
-            
+'STOP
             Call Counters_Check(TMexpirej)
             
         Next
@@ -77,8 +78,8 @@ Function No_Date(i, DateT1j, DateT6j, TMexpirej, status0, statusmin) As Integer
         No_Date = 1
                       
         If Sheets(SheetName).Cells(i, ManufDeclarationj) <> "" And IsDate(Sheets(SheetName).Cells(i, ManufDeclarationj)) Then
-'STOP
-            Call Check_Dates(i, DateT1j, Current_Date, ManufDeclarationj, TMexpirej, status0, statusmin)
+
+            Call Identify_Status(i, DateT1j, Current_Date, ManufDeclarationj, TMexpirej, status0, statusmin)
         
         End If
         
@@ -110,13 +111,37 @@ Function Counters_Check(TMexpirej)
             
 End Function
 
-Function Check_Dates(i, DateT1j, Current_Date, ManufDeclarationj, TMexpirej, status0, statusmin)
-'Compares the Certificates and Manufacturers' declarations dates and logs the Part Number status.
-    'Función repetida.
-    If Sheets(SheetName).Cells(i, DateT1j) <> "" And IsDate(Sheets(SheetName).Cells(i, DateT1j)) Then
+Function Identify_Status(i, DateT1j, Current_Date, ManufDeclarationj, TMexpirej, status0, statusmin)
     
-        Dif_Months = 60 - DateDiff("m", Sheets(SheetName).Cells(i, DateT1j), Current_Date)
-        Dif_Days = 1827 - DateDiff("d", Sheets(SheetName).Cells(i, DateT1j), Current_Date)
+    Dim ColumnPosition As Integer
+'STOP
+    ColumnPosition = DateT1j
+    status1 = Check_Dates(i, ColumnPosition, Current_Date, TMexpirej, status0, statusmin)
+    
+    ColumnPosition = ManufDeclarationj
+    status1 = Check_Dates(i, ColumnPosition, Current_Date, TMexpirej, status0, statusmin)
+    
+    ColumnPosition = TMexpirej
+    Call Global_Status(i, ColumnPosition, statusmin, status0, status1)
+    
+    If status0 < statusmin Then
+        
+        statusmin = status0        'Logs the new minimum status.
+        ColumnPosition = GlobalStatusj
+        Call Global_Status(i, ColumnPosition, statusmin, status0, status1)
+    
+    End If
+    
+    
+End Function
+
+Function Check_Dates(i, ColumnPosition, Current_Date, TMexpirej, status0, statusmin) As String
+'Compares the Certificates and Manufacturers' declarations dates and logs the Part Number status.
+'STOP
+    If Sheets(SheetName).Cells(i, ColumnPosition) <> "" And IsDate(Sheets(SheetName).Cells(i, ColumnPosition)) Then
+    
+        Dif_Months = 60 - DateDiff("m", Sheets(SheetName).Cells(i, ColumnPosition), Current_Date)
+        Dif_Days = 1827 - DateDiff("d", Sheets(SheetName).Cells(i, ColumnPosition), Current_Date)
     
     Else
 
@@ -124,121 +149,183 @@ Function Check_Dates(i, DateT1j, Current_Date, ManufDeclarationj, TMexpirej, sta
         Dif_Days = 0
         
     End If
+    
     'Función repetida.
-    If Sheets(SheetName).Cells(i, ManufDeclarationj) <> "" And IsDate(Sheets(SheetName).Cells(i, ManufDeclarationj)) Then
+    'If Sheets(SheetName).Cells(i, ManufDeclarationj) <> "" And IsDate(Sheets(SheetName).Cells(i, ManufDeclarationj)) Then
 
-        Dif_MonthDC = 60 - DateDiff("m", Sheets(SheetName).Cells(i, ManufDeclarationj), Current_Date)
-        Dif_DaysDC = 1827 - DateDiff("d", Sheets(SheetName).Cells(i, ManufDeclarationj), Current_Date)
+    '    Dif_MonthsDC = 60 - DateDiff("m", Sheets(SheetName).Cells(i, ManufDeclarationj), Current_Date)
+    '    Dif_DaysDC = 1827 - DateDiff("d", Sheets(SheetName).Cells(i, ManufDeclarationj), Current_Date)
         
-    Else
+    'Else
     
-        Dif_MonthsDC = 0
-        Dif_DaysDC = 0
+    '    Dif_MonthsDC = 0
+    '    Dif_DaysDC = 0
         
-    End If
+    'End If
     
-    If status0 <> 23 And (Dif_Months > 6 Or Dif_MonthsDC > 6) Then                    'Si faltan más de 6 meses para que expire: OK
-'STOP: AQUÍ TENGO QUE MIRAR DE RESOLVER EL TEMA DEL ESTADO GLOBAL.
-        status0 = 22
-        status1 = "OK"
+    'If status0 <> 23 And Dif_Months > 6 Then                    'Si faltan más de 6 meses para que expire: OK  'Or Dif_MonthsDC > 6)
         
-        Sheets(SheetName).Cells(i, TMexpirej) = status1
-        Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 4  'Verde si es OK
+        'Sheets(SheetName).Cells(i, TMexpirej) = status1
+        'Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 4  'Verde si es OK
         
-    End If
+    'End If
+    
     'Reescribir función.
-    If Dif_Months <= 6 And Dif_MonthsDC <= 6 Then                     'Si faltan menos de 6 meses para que expire
-'STOP
-        Sheets(SheetName).Cells(i, TMexpirej).Value = Dif_Months & " month/s"
-        Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 6      'Amarillo si falta entre 6 y 3 meses
-        status0 = 15 + Dif_Months
-        status1 = Dif_Months & " month/s"
-        
-        If Dif_Months <= 3 And Dif_MonthsDC <= 3 Then
-        
-            Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 44 'Amarillo oscuro si está entre 3 y 2 meses
-            
-            If Dif_Months <= 2 And Dif_MonthsDC <= 2 Then
-        
-                Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 45 'Naranja claro si está entre 2 y 1 mes/es.
-            
-                If Dif_Months <= 1 And Dif_MonthsDC <= 1 And Dif_Days <= 30 And Dif_DaysDC <= 30 Then   'Si faltan días para que expire
-            
-                    Sheets(SheetName).Cells(i, TMexpirej).Value = Dif_Days & " day/s"
-
-                    status1 = Dif_Days & " day/s"
-                                             
-                    Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 46 'Naranja oscuro faltan entre 30 y 1 días
-                    
-                    If Dif_Days <= 15 And Dif_DaysDC <= 15 Then
-                        
-                        status0 = Dif_Days
-                    
-                        If Dif_Days <= 0 And Dif_DaysDC <= 0 Then
-                
-                            status0 = 0
-                            status1 = "EXPIRED"
-                            Sheets(SheetName).Cells(i, TMexpirej).Value = status1
-                            Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 3  'Rojo si está caducado
-                            
-                        End If
-                    
-                    End If
-            
-                End If
-                
-            End If
-            
-        End If
-        
-    End If
     
-    If status0 < statusmin Then
+    Select Case Dif_Months
 
-        Call Global_Status(i, statusmin, status0, status1)
+        Case Is > 6
+            status0 = 22
+            Check_Dates = "OK"
+            Exit Function
+    
+        Case 2 To 6
+            status0 = 15 + Dif_Months
+            Check_Dates = Dif_Months & " month/s"
+            Exit Function
+            
+        Case Is <= 1
+            status0 = 16
+            Check_Dates = "1 month/s"
+            
+            Select Case Dif_Days
+            
+            Case 16 To 30
+                status0 = 16
+                Check_Dates = "1 month/s"
+                Exit Function
+            
+            Case 1 To 15
+                status0 = Dif_Days
+                Check_Dates = Dif_Days & " day/s"
+                Exit Function
+                
+            Case Is < 1
+                status0 = 0
+                Check_Dates = "EXPIRED"
+                Exit Function
+            
+            Case Else
+                Exit Function
         
-    End If
+        End Select
+    
+    End Select
+    
+    'If Dif_Months <= 6 Then                      'Si faltan menos de 6 meses para que expire 'And Dif_MonthsDC <= 6
+
+'        Check_Dates = Dif_Months & " month/s"
+        'Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 6      'Amarillo si falta entre 6 y 3 meses
+'        status0 = 15 + Dif_Months
+        
+'        If Dif_Months <= 3 And Dif_MonthsDC <= 3 Then
+        
+'            Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 44 'Amarillo oscuro si está entre 3 y 2 meses
+            
+ '           If Dif_Months <= 2 And Dif_MonthsDC <= 2 Then
+        
+  '              Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 45 'Naranja claro si está entre 2 y 1 mes/es.
+            
+   '             If Dif_Months <= 1 And Dif_MonthsDC <= 1 And Dif_Days <= 30 And Dif_DaysDC <= 30 Then   'Si faltan días para que expire
+            
+    '                Sheets(SheetName).Cells(i, TMexpirej).Value = Dif_Days & " day/s"
+
+     '               status1 = Dif_Days & " day/s"
+                                             
+      '              Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 46 'Naranja oscuro faltan entre 30 y 1 días
+                    
+       '             If Dif_Days <= 15 And Dif_DaysDC <= 15 Then
+                        
+        '                status0 = Dif_Days
+                    
+         '               If Dif_Days <= 0 And Dif_DaysDC <= 0 Then
+                
+'                            status0 = 0
+ '                           status1 = "EXPIRED"
+  '                          Sheets(SheetName).Cells(i, TMexpirej).Value = status1
+   '                         Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 3  'Rojo si está caducado
+    '
+     '                   End If
+      '
+       '             End If
+        '
+         '       End If
+          '
+           ' End If
+            
+'        End If
+    
+ '   End If
+    
+    'If status0 < statusmin Then
+        
+    '    Call Global_Status(i, statusmin, status0, status1)
+        
+    'End If
     
 End Function
 
-Function Global_Status(i, statusmin, status0, status1)    'Marca el estado global del Part number
+Function Global_Status(i, ColumnPosition, statusmin, status0, status1)
 'Logs the Global Status of each Part Number.
-              
-    Sheets(SheetName).Cells(i, GlobalStatusj).Value = status1
-        
-    statusmin = status0        'Logs the new minimum status.
     
-    Select Case statusmin
+    Call Locate_Positions_RankingStatus
+    
+    'Public RankingStatusSheet As String
+    'Public RSRankingi As Integer
+    'Public RSRankingj As Integer
+    'Public RSStatusENj As Integer
+    'Public RSStatusESj As Integer
+    'Public RSColorCodej As Integer
+    'Public RSEndi As Integer
+    
+    Sheets(SheetName).Cells(i, ColumnPosition).Value = status1
+'<------------------------------
+    Set FindStatus = Range(Sheets(RankingStatusSheet).Cells(RSRankingi, RSStatusENj), Sheets(RankingStatusSheet).Cells(RSEndi, RSStatusENj)).Find(status1)
+        
+    If FindStatus Is Nothing Then
+        
+        Sheets(SheetName).Cells(i, ColumnPosition).Interior.ColorIndex = 46
+        
+    Else
+    
+        Sheets(SheetName).Cells(i, ColumnPosition).Interior.ColorIndex = Sheets(RankingStatusSheet).Cells(FindStatus, RSColorCodej).Value
+        
+    End If
+'<------------------------------
+    
+    
+    'Select Case statusmin
            
-        Case 23
-            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 2       'White: No Date.
+     '   Case 23
+      '      Sheets(SheetName).Cells(i, TMexpirej).Value = status1
+       '     Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 2       'White: No Date.
         
-        Case 22
-            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 4       'Green: OK.
-        
-        Case 19 To 21
-            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 6       'Yellow: Between 6 to 3 months.
+'        Case 22
+ '           Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 4       'Green: OK.
+  '
+   '     Case 19 To 21
+    '        Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 6       'Yellow: Between 6 to 3 months.
 'STOP
-        Case 17, 18
-            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 44      'Dark Yellow: Between 3 to 2 months.
+     '   Case 17, 18
+      '      Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 44      'Dark Yellow: Between 3 to 2 months.
         
-        Case 16
-            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 45      'Orange: Between 2 to 1 month/s.
+       ' Case 16
+        '    Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 45      'Orange: Between 2 to 1 month/s.
         
-        Case 0
-            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 3       'Red: EXPIRED.
+'        Case 0
+ '           Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 3       'Red: EXPIRED.
     
-        Case Else        'Less than 1 month to expire or other.
+'        Case Else        'Less than 1 month to expire or other.
 'STOP
-            daynum = 0
-            auxday = Split(Cells(i, G).Value, " day/s")
-            daynum = auxday(0)
+ '           daynum = 0
+  '          auxday = Split(Cells(i, GlobalStatusj).Value, " day/s")
+   '         daynum = auxday(0)
+    '
+     '       If statusmin < 16 Then         'And m_d = "day/s"
+      '          Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 46              'Dark Orange: Between 30 to 1 day
+       '     End If
             
-            If statusmin <= 16 Then         'And m_d = "day/s"
-                Sheets(SheetName).Cells(i, G).Interior.ColorIndex = 46              'Dark Orange: Between 30 to 1 day
-            End If
-            
-    End Select
+'    End Select
     
 End Function
 
