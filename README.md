@@ -120,6 +120,8 @@ Todos los módulos renombrados para facilitar su identificación.
 --------------------------------------------------- BBDD F&S - VERSIÓN 5 --------------------------------------------------
 Adaptación del código InfoProveedores_SAP de “BOM Check REACH format Data Base V1.1.xlsm”.
 
+- Añadida nueva hoja "Ranking Status" para simplificar el código de colores.
+
 - Variables en “GlobalEntities” organizadas.
 
 - Renombrado de funciones a Inglés con el formato “Function_Name”.

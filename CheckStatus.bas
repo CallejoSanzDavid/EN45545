@@ -1,120 +1,60 @@
 Attribute VB_Name = "CheckStatus"
-Sub Comprobar_Caducidad()           'Comprueba el estado de los certificados.
+Sub Check_Status()           'Comprueba el estado de los certificados.
     
     Dim i As Integer
-    Dim j As Integer
-    Dim nj As Integer
-    Dim x As Integer
-    Dim N As Integer
-    Dim k As Integer
-    Dim G As Integer
-    Dim fechaActual As Date
-    Dim Dif_Mes As Integer
-    Dim Dif_Dia As Integer
-    Dim Dif_MesDC As Integer
-    Dim Dif_DiaDC As Integer
-    Dim status(6, 1) As String
+    Dim DateT1j As Integer
+    Dim Current_Date As Date
+    Dim Dif_Months As Integer
+    Dim Dif_Days As Integer
+    Dim Dif_MonthsDC As Integer
+    Dim Dif_DaysDC As Integer
     Dim status0 As Integer
     Dim status1 As String
     Dim auxstatus1(1) As String
-    Dim m_d As String
-    Dim Aux As Integer
     Dim statusmin As Integer
-    Dim DeclaracionConformidad As Integer
-    Dim DeclaracionConformidadj As Integer
-       
-    nj = Sheets("FCIL").Range("A10:DA10").Find("Date * T6").Column
-    x = Sheets("FCIL").Range("A10:DA10").Find("Test Method 1 time to expire*").Column
-    nprodj = Sheets("FCIL").Range("A10:DA10").Find("Supplier part number").Column
-    N = Sheets("FCIL").Cells(Rows.Count, nprodj).End(xlUp).Row
-    k = 1
-    fechaActual = Date
-    Aux = Sheets("FCIL").Range("A10:DA10").Find("Assembly Name").Row                'Fila inicial
-    DeclaracionConformidadj = Sheets("FCIL").Range("A10:DA10").Find("Manufacturer Declaration Date").Column
-        
-    Sheets("FCIL").Cells(Aux + 1, x).Select
-        
-    If Sheets("FCIL").FilterMode Then Sheets("FCIL").ShowAllData
-        
-    Call BaseProveedores
+    Dim ManufDeclaration As Integer
+    Dim No_Date_flag As Integer
     
-    For i = Sheets("FCIL").Range("A10:DA10").Find("Assembly Name").Row + 1 To N
-               
-        statusmin = 24                                                             'Valores de cadena auxiliares para evitar errores al comparar
+    Call Locate_Positions_OG
+    
+    Current_Date = Date
+      
+    Sheets(SheetName).Cells(Aux + 1, TMexpirej).Select
+    '<----------------------
+    'Call ClearFilters
+    '<----------------------
+    'Call Check_Contacts
+    
+    For i = Aux + 1 To N
+            
+        'STOP<----------------------------------
+        'Error: Test Method 5 se registra incorrectamente. "0 month/s", pero no tiene fecha.
+        i = 156
+            
+        statusmin = 24              'Auxiliar value to prevent bugs in the comparisons
         
         Application.StatusBar = "Checking Certificates Status: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
         
-        For j = Sheets("FCIL").Range("A10:DA10").Find("Date * T1").Column To nj Step 6
-        
-            Do While IsDate(Sheets("FCIL").Cells(i, j)) = False And j <= nj                   'Error: en la celda no hay una fecha
-                
-                Sheets("FCIL").Cells(i, x).Value = "No date"
-                Sheets("FCIL").Cells(i, x).Interior.ColorIndex = 2      'Blanco si no hay fecha
-                
-                status(k, 0) = 23
-                status(k, 1) = "No date"
-                              
-                If Sheets("FCIL").Cells(i, DeclaracionConformidadj) <> "" And IsDate(Sheets("FCIL").Cells(i, DeclaracionConformidadj)) Then
-                
-                    Call Comparador_Fechas(i, j, fechaActual, DeclaracionConformidadj, x, k, status, statusmin)
-                
-                Else
-                
-                    status0 = status(k, 0)
-                    status1 = status(k, 1)
-                    
-                    Call StatusGlobal(i, statusmin, status0, status1)
-                
-                End If
-                
-                If k = 6 Then
-                    
-                    k = 1
-                    
-                Else
-                    
-                    k = k + 1
-                
-                End If
-                
-                x = x + 1
-                               
-                If j >= nj Or x = Sheets("FCIL").Range("A10:DA10").Find("Test Method 1 time to expire*").Column + 6 Then    'Reiniciar marcador x y salir del bucle
-                    
-                    x = Sheets("FCIL").Range("A10:DA10").Find("Test Method 1 time to expire*").Column
-                    Exit For
-                
-                End If
-                
-                j = j + 6
-                
-            Loop
+        For DateT1j = Sheets(SheetName).Range("A10:DA10").Find("Date * T1").Column To DateT6j Step 6
+            
+            No_Date_flag = 0
+            status0 = 24            'Auxiliar value to prevent bugs in the comparisons
+            
+            If IsDate(Sheets(SheetName).Cells(i, DateT1j)) = False Then                   'Error: Cell with no date.
+
+                No_Date_flag = No_Date(i, DateT1j, DateT6j, TMexpirej, status0, statusmin)
+                Exit For            'Salir del for al terminar la función ¿?
+            
+            End If
                             
-            status(k, 0) = 24                       'Valores de cadena auxiliares para evitar errores al comparar
+            If No_Date_flag = 0 Then
+
+                Call Check_Dates(i, DateT1j, Current_Date, ManufDeclarationj, TMexpirej, status0, statusmin)
             
-            Call Comparador_Fechas(i, j, fechaActual, DeclaracionConformidadj, x, k, status, statusmin)
-            
-            If k = 6 Then
-                
-                k = 1
-                status(0, 0) = 24                                                             'Valores de cadena auxiliares para evitar errores al comparar
-            
-            Else
-                
-                k = k + 1
-                
             End If
             
-            If x = Sheets("FCIL").Range("A10:DA10").Find("Test Method 1 time to expire*").Column + 5 Then '---------------
-                
-                x = Sheets("FCIL").Range("A10:DA10").Find("Test Method 1 time to expire*").Column
-                
-            Else
+            Call Counters_Check(TMexpirej)
             
-                x = x + 1
-                
-            End If
-        
         Next
         
     Next
@@ -123,75 +63,123 @@ Sub Comprobar_Caducidad()           'Comprueba el estado de los certificados.
     
 End Sub
 
-Function Comparador_Fechas(i, j, fechaActual, DeclaracionConformidadj, x, k, status, statusmin)           'Compara las fechas de los certificados y declaraciones de conformidad y obtiene el estado correcto de la línea.
+Function No_Date(i, DateT1j, DateT6j, TMexpirej, status0, statusmin) As Integer
+'Logs the Certificates with No Date.
 
-    If Sheets("FCIL").Cells(i, j) <> "" And IsDate(Sheets("FCIL").Cells(i, j)) Then
-    
-        Dif_Mes = 60 - DateDiff("m", Sheets("FCIL").Cells(i, j), fechaActual)
-        Dif_Dia = 1827 - DateDiff("d", Sheets("FCIL").Cells(i, j), fechaActual)
-    
+    Do While DateT1j <= DateT6j
+        
+        status0 = 23
+        status1 = "No date"
+        
+        Sheets(SheetName).Cells(i, TMexpirej).Value = status1
+        Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 2      'No Date: White.
+        
+        No_Date = 1
+                      
+        If Sheets(SheetName).Cells(i, ManufDeclarationj) <> "" And IsDate(Sheets(SheetName).Cells(i, ManufDeclarationj)) Then
+'STOP
+            Call Check_Dates(i, DateT1j, Current_Date, ManufDeclarationj, TMexpirej, status0, statusmin)
+        
+        End If
+        
+        If status0 < statusmin Then
+
+            Call Global_Status(i, statusmin, status0, status1)
+        
+        End If
+
+        Call Counters_Check(TMexpirej)
+        
+        DateT1j = DateT1j + 6
+        
+    Loop
+
+End Function
+
+Function Counters_Check(TMexpirej)
+'Adds or resets counters
+    If TMexpirej = Sheets(SheetName).Range("A10:DA10").Find("Test Method 1 time to expire*").Column + 5 Then
+
+        TMexpirej = Sheets(SheetName).Range("A10:DA10").Find("Test Method 1 time to expire*").Column
+        
     Else
     
-        Dif_Mes = 0
-        Dif_Dia = 0
+        TMexpirej = TMexpirej + 1
         
     End If
+            
+End Function
+
+Function Check_Dates(i, DateT1j, Current_Date, ManufDeclarationj, TMexpirej, status0, statusmin)
+'Compares the Certificates and Manufacturers' declarations dates and logs the Part Number status.
+    'Función repetida.
+    If Sheets(SheetName).Cells(i, DateT1j) <> "" And IsDate(Sheets(SheetName).Cells(i, DateT1j)) Then
     
-    If Sheets("FCIL").Cells(i, DeclaracionConformidadj) <> "" And IsDate(Sheets("FCIL").Cells(i, DeclaracionConformidadj)) Then
+        Dif_Months = 60 - DateDiff("m", Sheets(SheetName).Cells(i, DateT1j), Current_Date)
+        Dif_Days = 1827 - DateDiff("d", Sheets(SheetName).Cells(i, DateT1j), Current_Date)
     
-        Dif_MesDC = 60 - DateDiff("m", Sheets("FCIL").Cells(i, DeclaracionConformidadj), fechaActual)
-        Dif_DiaDC = 1827 - DateDiff("d", Sheets("FCIL").Cells(i, DeclaracionConformidadj), fechaActual)
+    Else
+
+        Dif_Months = 0
+        Dif_Days = 0
+        
+    End If
+    'Función repetida.
+    If Sheets(SheetName).Cells(i, ManufDeclarationj) <> "" And IsDate(Sheets(SheetName).Cells(i, ManufDeclarationj)) Then
+
+        Dif_MonthDC = 60 - DateDiff("m", Sheets(SheetName).Cells(i, ManufDeclarationj), Current_Date)
+        Dif_DaysDC = 1827 - DateDiff("d", Sheets(SheetName).Cells(i, ManufDeclarationj), Current_Date)
         
     Else
     
-        Dif_MesDC = 0
-        Dif_DiaDC = 0
+        Dif_MonthsDC = 0
+        Dif_DaysDC = 0
         
     End If
-          
-    If CInt(status(k, 0)) <> 23 And (Dif_Mes > 6 Or Dif_MesDC > 6) Then                    'Si faltan más de 6 meses para que caduque: OK
     
-        Sheets("FCIL").Cells(i, x) = "OK"
-        Sheets("FCIL").Cells(i, x).Interior.ColorIndex = 4  'Verde si es OK
+    If status0 <> 23 And (Dif_Months > 6 Or Dif_MonthsDC > 6) Then                    'Si faltan más de 6 meses para que expire: OK
+'STOP: AQUÍ TENGO QUE MIRAR DE RESOLVER EL TEMA DEL ESTADO GLOBAL.
+        status0 = 22
+        status1 = "OK"
         
-        status(k, 0) = 22
-        status(k, 1) = "OK"
+        Sheets(SheetName).Cells(i, TMexpirej) = status1
+        Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 4  'Verde si es OK
         
     End If
-          
-    If Dif_Mes <= 6 And Dif_MesDC <= 6 Then                     'Si faltan menos de 6 meses para que caduque
-    
-        Sheets("FCIL").Cells(i, x).Value = Dif_Mes & " month/s"
-        Sheets("FCIL").Cells(i, x).Interior.ColorIndex = 6      'Amarillo si falta entre 6 y 3 meses
-        status(k, 0) = 15 + Dif_Mes
-        status(k, 1) = Dif_Mes & " month/s"
+    'Reescribir función.
+    If Dif_Months <= 6 And Dif_MonthsDC <= 6 Then                     'Si faltan menos de 6 meses para que expire
+'STOP
+        Sheets(SheetName).Cells(i, TMexpirej).Value = Dif_Months & " month/s"
+        Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 6      'Amarillo si falta entre 6 y 3 meses
+        status0 = 15 + Dif_Months
+        status1 = Dif_Months & " month/s"
         
-        If Dif_Mes <= 3 And Dif_MesDC <= 3 Then
+        If Dif_Months <= 3 And Dif_MonthsDC <= 3 Then
         
-            Sheets("FCIL").Cells(i, x).Interior.ColorIndex = 44 'Amarillo oscuro si está entre 3 y 2 meses
+            Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 44 'Amarillo oscuro si está entre 3 y 2 meses
             
-            If Dif_Mes <= 2 And Dif_MesDC <= 2 Then
+            If Dif_Months <= 2 And Dif_MonthsDC <= 2 Then
         
-                Sheets("FCIL").Cells(i, x).Interior.ColorIndex = 45 'Naranja claro si está entre 2 y 1 mes/es.
+                Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 45 'Naranja claro si está entre 2 y 1 mes/es.
             
-                If Dif_Mes <= 1 And Dif_MesDC <= 1 And Dif_Dia <= 30 And Dif_DiaDC <= 30 Then   'Si faltan días para que caduque
+                If Dif_Months <= 1 And Dif_MonthsDC <= 1 And Dif_Days <= 30 And Dif_DaysDC <= 30 Then   'Si faltan días para que expire
             
-                    Sheets("FCIL").Cells(i, x).Value = Dif_Dia & " day/s"
+                    Sheets(SheetName).Cells(i, TMexpirej).Value = Dif_Days & " day/s"
 
-                    status(k, 1) = Dif_Dia & " day/s"
+                    status1 = Dif_Days & " day/s"
                                              
-                    Sheets("FCIL").Cells(i, x).Interior.ColorIndex = 46 'Naranja oscuro faltan entre 30 y 1 días
+                    Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 46 'Naranja oscuro faltan entre 30 y 1 días
                     
-                    If Dif_Dia <= 15 And Dif_DiaDC <= 15 Then
+                    If Dif_Days <= 15 And Dif_DaysDC <= 15 Then
                         
-                        status(k, 0) = Dif_Dia
+                        status0 = Dif_Days
                     
-                        If Dif_Dia <= 0 And Dif_DiaDC <= 0 Then
+                        If Dif_Days <= 0 And Dif_DaysDC <= 0 Then
                 
-                            status(k, 0) = 0
-                            status(k, 1) = "EXPIRED"
-                            Sheets("FCIL").Cells(i, x).Value = status(k, 1)
-                            Sheets("FCIL").Cells(i, x).Interior.ColorIndex = 3  'Rojo si está caducado
+                            status0 = 0
+                            status1 = "EXPIRED"
+                            Sheets(SheetName).Cells(i, TMexpirej).Value = status1
+                            Sheets(SheetName).Cells(i, TMexpirej).Interior.ColorIndex = 3  'Rojo si está caducado
                             
                         End If
                     
@@ -204,126 +192,86 @@ Function Comparador_Fechas(i, j, fechaActual, DeclaracionConformidadj, x, k, sta
         End If
         
     End If
-    
-    status0 = CInt(status(k, 0))
-    status1 = status(k, 1)
-    
-    Call StatusGlobal(i, statusmin, status0, status1)
-    
-End Function
-
-Function StatusGlobal(i, statusmin, status0, status1)     'Marca el estado global del Part number
-      
-    G = Sheets("FCIL").Range("A10:DA10").Find("Certificate global status*").Column
     
     If status0 < statusmin Then
-                
-        Sheets("FCIL").Cells(i, G).Value = status1
-        
-        If status0 <= 21 And status0 >= 19 Then           'Corrige el error de escala entre 6 y 3 meses
-        
-            status0 = 21
-            
-        End If
-        
-        statusmin = status0        'Se coloca aquí ya que el if anterior corrige el error de escala entre 6 y 3 meses
-        
-        If statusmin <= 23 Then
-        
-            Sheets("FCIL").Cells(i, G).Interior.ColorIndex = 2      'Blanco si no hay fecha
-        
-            If statusmin <= 22 Then       'Si faltan más de 6 meses para que caduque: OK
-            
-                Sheets("FCIL").Cells(i, G).Interior.ColorIndex = 4  'Verde si es OK
-                
-                If statusmin <= 21 Then      'Si faltan menos de 6 meses para que caduque
-                
-                    Sheets("FCIL").Cells(i, G).Interior.ColorIndex = 6  'Amarillo si falta entre 6 y 3 meses
-                                       
-                    If statusmin <= 18 Then
-                        
-                        Sheets("FCIL").Cells(i, G).Interior.ColorIndex = 44 'Amarillo oscuro si está entre 3 y 2 meses
-                        
-                        If statusmin <= 17 Then
-                            
-                            Sheets("FCIL").Cells(i, G).Interior.ColorIndex = 45 'Naranja claro si está entre 2 y 1 mes/es.
-        
-                            If statusmin <> 0 Then
-                    
-                                auxstatus1 = Split(status1, " ")        'Utilizamos este marcador para evitar el error al rellenar el color para días entre 30 y 16 días.
-                                m_d = auxstatus1(1)
-                                
-                                If statusmin <= 16 And m_d = "day/s" Then
-                            
-                                    Sheets("FCIL").Cells(i, G).Interior.ColorIndex = 46 'Naranja oscuro faltan entre 30 y 1 días
-                                                                      
-                                End If
-                                
-                            End If
-                                                       
-                            If statusmin <= 0 Then
-                        
-                                Sheets("FCIL").Cells(i, G).Interior.ColorIndex = 3  'Rojo si está caducado
-                                
-                            End If
-                        
-                        End If
-                        
-                    End If
-                        
-                End If
-                
-            End If
-        
-        End If
+
+        Call Global_Status(i, statusmin, status0, status1)
         
     End If
     
 End Function
 
-Function BaseProveedores()      'Busca y registra la información de contacto.
+Function Global_Status(i, statusmin, status0, status1)    'Marca el estado global del Part number
+'Logs the Global Status of each Part Number.
+              
+    Sheets(SheetName).Cells(i, GlobalStatusj).Value = status1
+        
+    statusmin = status0        'Logs the new minimum status.
+    
+    Select Case statusmin
+           
+        Case 23
+            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 2       'White: No Date.
+        
+        Case 22
+            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 4       'Green: OK.
+        
+        Case 19 To 21
+            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 6       'Yellow: Between 6 to 3 months.
+'STOP
+        Case 17, 18
+            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 44      'Dark Yellow: Between 3 to 2 months.
+        
+        Case 16
+            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 45      'Orange: Between 2 to 1 month/s.
+        
+        Case 0
+            Sheets(SheetName).Cells(i, GlobalStatusj).Interior.ColorIndex = 3       'Red: EXPIRED.
+    
+        Case Else        'Less than 1 month to expire or other.
+'STOP
+            daynum = 0
+            auxday = Split(Cells(i, G).Value, " day/s")
+            daynum = auxday(0)
+            
+            If statusmin <= 16 Then         'And m_d = "day/s"
+                Sheets(SheetName).Cells(i, G).Interior.ColorIndex = 46              'Dark Orange: Between 30 to 1 day
+            End If
+            
+    End Select
+    
+End Function
 
-    Dim manufj As Integer
+
+Function Check_Contacts()
+'Finds and logs the contact information in the Supplier's Contact column.
+'Efficiency: 909 lines in 29.10 seconds.
     Dim manufacturer As String
+    Dim auxmanufacturer As String
     Dim m As Integer
-    Dim N As Integer
-    Dim ContarDB As Integer
-    Dim ContactDBj As Integer
-    Dim ContactoDBi As Integer
-    Dim supplieri As Integer
-    Dim supplierj As Integer
-    Dim mailj As Integer
     Dim linea As Integer
     Dim c As Range
     
-    manufj = Sheets("FCIL").Range("A10:DA10").Find("Manufacturer name*").Column
+    Call Locate_Positions_Contacts
     
-    ContactDBj = Sheets("FCIL").Range("A10:DA10").Find("Supplier's Contact").Column
-    ContactoDBi = Sheets("FCIL").Range("A10:DA10").Find("Supplier's Contact").Row + 1
-    supplieri = Sheets("Contacto de proveedores").Range("A1:Z1").Find("Supplier").Row + 1
-    supplierj = Sheets("Contacto de proveedores").Range("A1:Z1").Find("Supplier").Column
-    mailj = Sheets("Contacto de proveedores").Range("A1:Z1").Find("Mail").Column
+    auxmanufacturer = ""
+    manufacturer = Sheets(SheetName).Cells(Aux + 1, manufj).Value
     
-    j = Sheets("Contacto de proveedores").Range("A1:Z1").Find("Supplier").Column
-    
-    ContarDB = Sheets("Contacto de proveedores").Cells(Rows.Count, j).End(xlUp).Row
-    
-    nprodj = Sheets("FCIL").Range("A10:DA10").Find("Supplier part number").Column
-    N = Sheets("FCIL").Cells(Rows.Count, nprodj).End(xlUp).Row
-
-
-    For m = ContactoDBi To N
+    For m = Aux + 1 To N
         
-        Application.StatusBar = "Updating Supplier's Contact Information: " & m - ContactoDBi + 1 & " of " & N - ContactoDBi + 1 & ": " & Format((m - ContactoDBi + 1) / (N - ContactoDBi + 1), "0%")
+        Application.StatusBar = "Updating Supplier's Contact Information: " & m - Aux & " of " & N - Aux & ": " & Format((m - Aux) / (N - Aux), "0%")
         
-        manufacturer = Sheets("FCIL").Cells(m, manufj).Value
+        If auxmanufacturer <> manufacturer Then     'Only finds the contact info once.
+            
+            auxmanufacturer = manufacturer
+            Set c = Range(Sheets(ContactSheetName).Cells(CPsupplieri, CPsupplierj), Sheets(ContactSheetName).Cells(CPendi, CPsupplierj)).Find(manufacturer)
         
-        Set c = Range(Sheets("Contacto de proveedores").Cells(supplieri, supplierj), Sheets("Contacto de proveedores").Cells(ContarDB, supplierj)).Find(manufacturer)
+        End If
         
-        If c Is Nothing Then
+        If c Is Nothing Then                        'No contact info.
         
-            Sheets("FCIL").Cells(m, ContactDBj) = "Does NOT Exist"
-            Sheets("FCIL").Cells(m, ContactDBj).Interior.ColorIndex = 3
+            Sheets(SheetName).Cells(m, ContactDBj) = "Does NOT Exist"
+            Sheets(SheetName).Cells(m, ContactDBj).Interior.ColorIndex = 3
         
             linea = 0
             
@@ -331,10 +279,10 @@ Function BaseProveedores()      'Busca y registra la información de contacto.
         
             linea = c.Row
             
-            If Sheets("Contacto de proveedores").Cells(linea, mailj) = "" Then
+            If Sheets(ContactSheetName).Cells(linea, CPmailj) = "" Then     'Exists the Provider in the list but has no contact info.
             
-                Sheets("FCIL").Cells(m, ContactDBj) = "Does NOT Exist"
-                Sheets("FCIL").Cells(m, ContactDBj).Interior.ColorIndex = 3
+                Sheets(SheetName).Cells(m, ContactDBj) = "Does NOT Exist"
+                Sheets(SheetName).Cells(m, ContactDBj).Interior.ColorIndex = 3
                 
                 linea = 0
                 
@@ -342,12 +290,14 @@ Function BaseProveedores()      'Busca y registra la información de contacto.
             
         End If
         
-        If linea <> 0 Then
+        If linea <> 0 Then      'Exists contact info.
                 
-            Sheets("FCIL").Cells(m, ContactDBj) = Sheets("Contacto de proveedores").Cells(linea, mailj)
-            Sheets("FCIL").Cells(m, ContactDBj).Interior.ColorIndex = 43
+            Sheets(SheetName).Cells(m, ContactDBj) = Sheets(ContactSheetName).Cells(linea, CPmailj)
+            Sheets(SheetName).Cells(m, ContactDBj).Interior.ColorIndex = 43
              
         End If
+        
+        manufacturer = Sheets(SheetName).Cells(m + 1, manufj).Value
         
     Next
     
