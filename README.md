@@ -122,7 +122,8 @@ Adaptación del código InfoProveedores_SAP de “BOM Check REACH format Data Ba
 
 - Añadida nueva hoja "Ranking Status" para simplificar el código de colores.
 
-- Variables en “GlobalEntities” organizadas.
+- Variables en “GlobalEntities” organizadas dentro de las funciones en donde se inicializan.
+- En “GlobalEntities” solo se declaran las variables que se inicializan en varios módulos.
 
 - Renombrado de funciones a Inglés con el formato “Function_Name”.
 - Traducidos los comentarios en Inglés.
