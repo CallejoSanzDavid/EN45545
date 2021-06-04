@@ -1,7 +1,6 @@
 Attribute VB_Name = "LocatePositions"
-Sub Locate_Positions_OG()
-'Locates the necesary positions in the current activated sheet for the correct function of the code.
-    
+Option Explicit
+'----------Locate_Positions_OG----------
     Public SheetName As String
     'Rows
     Public Aux As Integer   'Initial
@@ -16,6 +15,29 @@ Sub Locate_Positions_OG()
     Public GlobalStatusj As Integer
     Public TMexpirej As Integer
     Public ContactDBj As Integer
+
+'----------Locate_Positions_Contacts----------
+    Public ContactSheetName As String
+    'Rows
+    Public CPendi As Integer
+    Public CPsupplieri As Integer
+    'Columns
+    Public CPmailj As Integer
+    Public CPsupplierj As Integer
+
+'----------Locate_Positions_RankingStatus----------
+    Public RankingStatusSheet As String
+    'Rows
+    Public RSRankingi As Integer
+    Public RSEndi As Integer
+    'Columns
+    Public RSRankingj As Integer
+    Public RSStatusENj As Integer
+    Public RSStatusESj As Integer
+    Public RSColorCodej As Integer
+    
+Sub Locate_Positions_OG()
+'Locates the necesary positions in the current activated sheet for the correct function of the code.
     
     SheetName = ActiveSheet.Name
     
@@ -39,49 +61,44 @@ End Sub
 Sub Locate_Positions_Contacts()
 'Locates the necesary positions for the correct function of the code.
     
-    Public ContactSheetName As String
-    'Rows
-    Public CPendi As Integer
-    Public CPsupplieri As Integer
-    'Columns
-    Public CPmailj As Integer
-    Public CPsupplierj As Integer
+    Dim AuxSheet As String
+    
+    AuxSheet = ActiveSheet.Name
     
     ContactSheetName = "Contacto de proveedores"
+    Sheets(ContactSheetName).Activate
     
     CPsupplieri = Sheets(ContactSheetName).Range("A1:Z10").Find("Supplier").Row + 1
     
-    CPsupplierj = Sheets(ContactSheetName).Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 100)).Find("Supplier").Column
-    CPmailj = Sheets(ContactSheetName).Range("A1:J1").Find("Mail").Column
+    CPsupplierj = Sheets(ContactSheetName).Range(Cells(CPsupplieri - 1, 1), Cells(CPsupplieri - 1, 100)).Find("Supplier").Column
+    CPmailj = Sheets(ContactSheetName).Range(Cells(CPsupplieri - 1, 1), Cells(CPsupplieri - 1, 100)).Find("Mail").Column
     
     CPendi = Sheets(ContactSheetName).Cells(Rows.Count, CPsupplierj).End(xlUp).Row
+    
+    Sheets(AuxSheet).Activate
     
 End Sub
 
 Sub Locate_Positions_RankingStatus()
     
-    Public RankingStatusSheet As String
-    'Rows
-    Public RSRankingi As Integer
-    Public RSEndi As Integer
-    'Columns
-    Public RSRankingj As Integer
-    Public RSStatusENj As Integer
-    Public RSStatusESj As Integer
-    Public RSColorCodej As Integer
+    Dim AuxSheet As String
     
+    AuxSheet = ActiveSheet.Name
     
     RankingStatusSheet = "Ranking Status"
-    
-    RSRankingi = Sheets(RankingStatusSheet).Range("A1:DA20").Find("Ranking").Row
-    
+    Sheets(RankingStatusSheet).Activate
+        
+    RSRankingi = Sheets(RankingStatusSheet).Range("A1:Z10").Find("Ranking").Row
+
     RSRankingj = Sheets(RankingStatusSheet).Range(Cells(RSRankingi, 1), Cells(RSRankingi, 20)).Find("Ranking").Column
     RSStatusENj = Sheets(RankingStatusSheet).Range(Cells(RSRankingi, 1), Cells(RSRankingi, 20)).Find("Status (EN)").Column
     RSStatusESj = Sheets(RankingStatusSheet).Range(Cells(RSRankingi, 1), Cells(RSRankingi, 20)).Find("Status (ES)").Column
     RSColorCodej = Sheets(RankingStatusSheet).Range(Cells(RSRankingi, 1), Cells(RSRankingi, 20)).Find("Color Code").Column
     
-    RSEndi = Sheets(ContactSheetName).Cells(Rows.Count, RSRankingj).End(xlUp).Row
-
+    RSEndi = Sheets(RankingStatusSheet).Cells(Rows.Count, RSRankingj).End(xlUp).Row
+    
+    Sheets(AuxSheet).Activate
+    
 End Sub
 
 
