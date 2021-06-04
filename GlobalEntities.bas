@@ -101,7 +101,7 @@ Option Explicit
 '-----------------Variables comunes-----------------
        
     'Contador de bucle
-    Public i As Integer 'Delete?
+    'Public i As Integer 'Delete?
     
     
     
