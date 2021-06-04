@@ -121,12 +121,14 @@ Todos los módulos renombrados para facilitar su identificación.
 Adaptación del código InfoProveedores_SAP de “BOM Check REACH format Data Base V1.1.xlsm”.
 
 - Añadida nueva hoja "Ranking Status" para simplificar el código de colores.
+- Añadida nueva hoja "Email Body" para simplificar la escritura del email standard.
 
 - Variables en “GlobalEntities” organizadas dentro de las funciones en donde se inicializan.
 - En “GlobalEntities” solo se declaran las variables que se inicializan en varios módulos.
 
 - Renombrado de funciones a Inglés con el formato “Function_Name”.
 - Traducidos los comentarios en Inglés.
+- Cambiado los nombres de las hojas a inglés.
 
 - CheckStatus:
 	- Nueva función: NoDate(). Función que se invoca cuando no hay fecha para un ensayo. <----------- Eliminada
