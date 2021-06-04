@@ -129,11 +129,15 @@ Adaptación del código InfoProveedores_SAP de “BOM Check REACH format Data Ba
 - Traducidos los comentarios en Inglés.
 
 - CheckStatus:
-	- Nueva función: NoDate(). Función que se invoca cuando no hay fecha para un ensayo.
+	- Nueva función: NoDate(). Función que se invoca cuando no hay fecha para un ensayo. <----------- Eliminada
 	- Nueva función: CountersCheck(). Checkea y actualiza el estado de los contadores de los bucles.
 	- Cambio de Nombres de variables para hacer el código más comprensible. Por ejemplo: G por GlobalStatusj.
 	- Eliminada cadena status(6,1) por ser innecesaria. Por lo que podemos prescindir del valor k.
 	- Check_Contacts reestructurado.
+	- Eliminadas variables innecesarias.
+	
+- LocatePositions:
+	- Error corregido.
 	
 
 
