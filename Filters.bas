@@ -2,6 +2,8 @@ Attribute VB_Name = "Filters"
 Option Explicit
     
     Public TableName As String
+    Public FilterSet As String
+    
 
 Sub ClearFilters()       'Borra todos los filtros.
 
@@ -17,8 +19,6 @@ End Sub
 'FilterSet = Sheets(SheetName).Cells(i, j).Value            'Posición del encabezado donde aplicar el filtro.
 
 Sub AlfabeticOrder()     'Filtro: Ordenar en orden alfabético.
-
-    Public FilterSet As String
     
     On Error GoTo ErrorHandler:
     
