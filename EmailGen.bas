@@ -1,55 +1,50 @@
 Attribute VB_Name = "EmailGen"
-Sub Email_Gen()         'Genera correos de las líneas que contengan certificados caducados.
-      
+Sub Email_Gen()
+'Creates emails with the information of expired or about to expire to its pertinent supplier.
+    
+    Dim Export As Integer
+    
     Application.StatusBar = ""
     Application.ScreenUpdating = False
     
-    SheetName = ActiveSheet.Name
-    ContactSheetName = "Contacto de proveedores"
+    Call Locate_Positions_OG
     
-    'Localizamos las posiciones en el FCIL
-    Aux = Sheets(SheetName).Range("A1:DA20").Find("Assembly Name").Row
-    G = Sheets(SheetName).Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Certificate global status*").Column
-    nprodj = Sheets(SheetName).Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Supplier part number").Column
-    N = Sheets(SheetName).Cells(Rows.Count, nprodj).End(xlUp).Row
+    '<-----------------------------------
+    'Call Format_Capitalization
     
-    nombj = Sheets(SheetName).Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Part name").Column
-    matj = Sheets(SheetName).Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Raw material or product name*").Column
-    manufj = Sheets(SheetName).Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Manufacturer name*").Column
-    contactj = Sheets(SheetName).Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Supplier's Contact").Column
+    Sheets(SheetName).Cells(Aux + 1, GlobalStatusj).Select
     
-    Call MAYUSCULAS
+    '<-----------------------------------
+    'TableName = ActiveSheet.ListObjects(1).Name
+    'Call ClearFilters
+    'Sorts Part Names in Alfabetic Order.
+    'FilterSet = Sheets(SheetName).Cells(Aux, nombj).Value
+    'Call AlfabeticOrder
+    'Sorts Part Numbers in Alfabetic Order.
+    'FilterSet = Sheets(SheetName).Cells(Aux, nprodj).Value
+    'Call AlfabeticOrder
+    'Sorts Suppliers in Alfabetic Order.
+    'FilterSet = Sheets(SheetName).Cells(Aux, manufj).Value
+    'Call AlfabeticOrder
     
-    'Localizamos posiciones en la hoja de Contacto de proveedores
-    CPsupplierj = Sheets(ContactSheetName).Range("A1:J1").Find("Supplier").Column
-    CPendi = Sheets(ContactSheetName).Cells(Rows.Count, CPsupplierj).End(xlUp).Row
-    CPmailj = Sheets(ContactSheetName).Range("A1:J1").Find("Mail").Column
+    Call Locate_Positions_Contacts
     
-    Sheets(SheetName).Cells(Aux + 1, G).Select
-       
-    TableName = ActiveSheet.ListObjects(1).Name
+    Call Locate_Positions_Email_Body
     
-    'Borrar todos los filtros que haya aplicados
-    Call ClearFilters
-    'Ordenar los Part Names por orden alfabético
-    FilterSet = Sheets(SheetName).Cells(Aux, nombj).Value
-    Call AlfabeticOrder
-    'Ordenar los Part Numbers por orden alfabético
-    FilterSet = Sheets(SheetName).Cells(Aux, nprodj).Value
-    Call AlfabeticOrder
-    'Ordenar los Proveedores por orden alfabético
-    FilterSet = Sheets(SheetName).Cells(Aux, manufj).Value
-    Call AlfabeticOrder
-       
+    Call Email_Body
+    '<----------------------------------- DELETOS?
     'Información fija del email
-    EncabezadoEN = "Dear Supplier," + vbCrLf + vbCrLf + "With this email we inform you that the Fire & Smoke declaration under the standard EN45545-2 related to the listed MERAK part number/s supplied by you are expired or will expire shortly. We kindly ask you to provide the extension declaration dossier as soon as possible." + vbCrLf + vbCrLf + "Product information: " + vbCrLf + vbCrLf
-    DespedidaEN = "We remain waiting for your answer." + vbCrLf + vbCrLf + "Thank you very much in advance." + vbCrLf + vbCrLf
-    Separacion = "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" + vbCrLf + vbCrLf
-    EncabezadoES = "Estimado Proveedor," + vbCrLf + vbCrLf + "Con este correo electrónico le informamos de que su declaración de Fuegos y Humos bajo el estándar EN45545-2 en relación al listado de número/s MERAK distribuido por ustedes ha expirado o expirará pronto. Les pedimos que nos faciliten la declaración de conformidad lo antes posible." + vbCrLf + vbCrLf + "Información del producto: " + vbCrLf + vbCrLf
-    DespedidaES = "Esperamos su respuesta." + vbCrLf + vbCrLf + "Gracias de antemano." + vbCrLf + vbCrLf
-    Firma = "MERAK Spain, S.A." + vbCrLf + "Miguel Faraday, 1" + vbCrLf + "Parque Empresarial 'La Carpetania'" + vbCrLf + "28906 Getafe (Madrid)" + vbCrLf + "mailto: f&s@merak-hvac.com"
-        
-    'Inicialización de marcadores
+    'EBHeadingEN = "Dear Supplier," + vbCrLf + vbCrLf + "With this email we inform you that the Fire & Smoke declaration under the standard EN45545-2 related to the listed MERAK part number/s supplied by you are expired or will expire shortly. We kindly ask you to provide the extension declaration dossier as soon as possible." + vbCrLf + vbCrLf + "Product information: " + vbCrLf + vbCrLf
+    'EBFarewellEN = "We remain waiting for your answer." + vbCrLf + vbCrLf + "Thank you very much in advance." + vbCrLf + vbCrLf
+    'EBSeparation = "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" + vbCrLf + vbCrLf
+    'EBHeadingES = "Estimado Proveedor," + vbCrLf + vbCrLf + "Con este correo electrónico le informamos de que su declaración de Fuegos y Humos bajo el estándar EN45545-2 en relación al listado de número/s MERAK distribuido por ustedes ha expirado o expirará pronto. Les pedimos que nos faciliten la declaración de conformidad lo antes posible." + vbCrLf + vbCrLf + "Información del producto: " + vbCrLf + vbCrLf
+    'EBFarewellES = "Esperamos su respuesta." + vbCrLf + vbCrLf + "Gracias de antemano." + vbCrLf + vbCrLf
+    'EBSignature = "MERAK Spain, S.A." + vbCrLf + "Miguel Faraday, 1" + vbCrLf + "Parque Empresarial 'La Carpetania'" + vbCrLf + "28906 Getafe (Madrid)" + vbCrLf + "mailto: f&s@merak-hvac.com"
+    '<----------------------------------- DELETOS?
+    
+    Call Locate_Positions_RankingStatus
+    
+    'flags initial values
     ncorreos = 0
     nsincontacto = 0
     nexport = 0
@@ -57,11 +52,11 @@ Sub Email_Gen()         'Genera correos de las líneas que contengan certificados
     
     For i = Aux + 1 To N
         
-        NoContact = ManufacturerContact(SheetName, i, manufj)
+        NoContact = Manufacturer_Contact(SheetName, i, manufj)
         
         If NoContact = 0 Then
         
-            GoTo NoContact:     'Si no existe el contacto se pasa a la siguiente iteración.
+            GoTo NoContact:     'If there is no contact goes to the next line.
         
         End If
     
@@ -69,28 +64,27 @@ NextPartNumber:
         
         Application.StatusBar = "Checking expired certificates and generating emails: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
         
-        Valj = Sheets(SheetName).Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Email Sended").Column
-        validacion = Alarmas()
+        ColumnPosition = GlobalStatusj
+        statusmin = Alarms_Check(i, ColumnPosition)
         
-        Valj = G
-        statusmin = Alarmas()
+        ColumnPosition = EmailSendedj
+        Validation = Alarms_Check(i, ColumnPosition)
         
-        'Inicialización de marcadores
+        'flags initial values
         stat = 3
         auxstatus = 30
-        marc1 = 0               'Marcador para identificar en qué bucle ha entrado:
-                                '0 - Estado inicial: Part Number con un material.
-                                '1 - Diversos materiales para un Part Number.
-        lasterror = 0           'Marcador para evitar el error en el que no se registran las últimas líneas del Part Number si no están OK y son del mismo material.
+        marc1 = 0               'flags to identify the correct loop:
+                                '0 - Initial value: Part Number with a simple material.
+                                '1 - Part Number with several materials.
+        lasterror = 0           'flag to prevent the error in which the last lines are not loged if it's not OK or are the same material.
         
-        
-        If statusmin <= 21 And validacion > statusmin Then
+        If statusmin <= 21 And Validation > statusmin Then
             
-            status = Sheets(SheetName).Cells(i, G)
+            'status = Sheets(SheetName).Cells(i, GlobalStatusj)     DELETOS?
             
             nproducto = Sheets(SheetName).Cells(i, nprodj).Value
             
-            Auxsplit = 0            'Esta variable se inicializa en 0 y se usa para detectar si el Part Number está compuesto por varios materiales
+            Auxsplit = 0            'flag initialized as 0 to detect if the Part Number has several materials.
             auxname = Split(Cells(i, nombj).Value, " - MATERIAL")
             nombre = auxname(0)
             
@@ -100,10 +94,10 @@ NextPartNumber:
             
 ErrorHandler:
             
-            If Err.Number = 9 Then      'Solución error 9. Subíndice fuera del intervalo.
+            If Err.Number = 9 Then      'Solution for error 9: Subindex out of interval.
 
                 Auxsplit = 0
-                Err.Clear               'Marca que el error se ha solucionado.
+                Err.Clear               'Error solved.
                 Resume ErrorHandler:
                 
             End If
@@ -112,37 +106,37 @@ ErrorHandler:
             
             material = Sheets(SheetName).Cells(i, matj).Value
                          
-            Do While manufacturer = Sheets(SheetName).Cells(i + 1, manufj).Value   'Si el Proveedor en la siguiente línea es igual entra en el bucle
+            Do While manufacturer = Sheets(SheetName).Cells(i + 1, manufj).Value   'If the next supplier is the same gets in this loop.
                 
-                status = Sheets(SheetName).Cells(i, G)
-                '-------------------------------Diversos materiales para un Part Number ---------------------------------
+                status = Sheets(SheetName).Cells(i, GlobalStatusj)
+                '-------------------------------Part Numbers with several materials---------------------------------
                 If Auxsplit <> 0 And status <> "OK" Then
                     
-                    marc1 = ComplexPartNumber
+                    marc1 = Complex_Part_Number
                         
                 End If
                     
-                '-------------------------------Si el part number solo tiene un material---------------------------------
+                '-------------------------------Part Numbers with one material---------------------------------
                 If Auxsplit = 0 And marc1 = 0 And status <> "OK" Then
                                             
-                    Call SimplePartNumber
+                    Call Simple_Part_Number
                     
                 End If
                 
                 Select Case stat
                     
-                    Case 2        'Si faltan día/s para que el material más restrictivo caduque.
+                    Case 2        'Days left for the certificate to expire.
                         InfoEN = "- MERAK part number: " & nproducto & "." + vbCrLf + "- MERAK part name: " & nombre & " (" & auxstatus & " day/s to expire)." + vbCrLf
                         InfoES = "- Número del elemento de MERAK: " & nproducto & "." + vbCrLf + "- Nombre del elemento MERAK: " & nombre & " (" & auxstatus & " día/s para expirar)." + vbCrLf
                         expstatus = auxstatus & " día/s para expirar"
                                       
-                    Case 1        'Si faltan mes/es para que el material más restrictivo caduque.
+                    Case 1        'Months left for the certificate to expire.
                         
                         InfoEN = "- MERAK part number: " & nproducto & "." + vbCrLf + "- MERAK part name: " & nombre & " (" & auxstatus & " month/s to expire)." + vbCrLf
                         InfoES = "- Número del elemento de MERAK: " & nproducto & "." + vbCrLf + "- Nombre del elemento MERAK: " & nombre & " (" & auxstatus & " mes/es para expirar)." + vbCrLf
                         expstatus = auxstatus & " mes/es para expirar"
                         
-                    Case 0        'Si algunos de los materiales ha expirado.
+                    Case 0        'Any of the materials has expired.
                         
                         InfoEN = "- MERAK part number: " & nproducto & "." + vbCrLf + "- MERAK part name: " & nombre & " (EXPIRED)." + vbCrLf
                         InfoES = "- Número del elemento de MERAK: " & nproducto & "." + vbCrLf + "- Nombre del elemento MERAK: " & nombre & " (EXPIRADO)." + vbCrLf
@@ -158,27 +152,34 @@ ErrorHandler:
                 InfoENRW = ""
                 InfoESRW = ""
                 
-                If Export = 1 Then         'Se genera una línea en la BB.DD. de Pedidos por Part Number
+                If Export = 1 Then         'A new line is loged for each Part Number in the Data Base "Pedidos".
         
-                    Call EXPORT_DATA
+                    Call Export_Data
                     nexport = nexport + 1
                     
-                End If
-                
-                If Export = 1 And manufacturer = Sheets(SheetName).Cells(i + 1, manufj).Value Then
+                    If manufacturer = Sheets(SheetName).Cells(i + 1, manufj).Value Then
                     
-                    i = i + 1               'Así evitamos que vuelva a analizar el último part number
-                    GoTo NextPartNumber:    'Vuelve al bucle saltándose las funciones que identifican el contacto
-                
+                        i = i + 1               'With this line we prevent the code to analize the last line again.
+                        GoTo NextPartNumber:    'Starts the loop again skipping the "Manufacturer_Contact" function.
+                    
+                    End If
+                    
                 End If
+                '<--------------------------
+                'If Export = 1 And manufacturer = Sheets(SheetName).Cells(i + 1, manufj).Value Then
+                    
+                    'i = i + 1               'Así evitamos que vuelva a analizar el último part number
+                    'GoTo NextPartNumber:    'Vuelve al bucle saltándose las funciones que identifican el contacto
                 
-            Loop                    'Bucle Proveedor.
+                'End If
+                '<--------------------------
+            Loop
                 
         End If
         
         If Export = 1 And manufacturer <> Sheets(SheetName).Cells(i + 1, manufj).Value Then
             
-            Call EmailDisplay
+            Call Email_Display
             ncorreos = ncorreos + 1
             
             Export = 0
@@ -194,7 +195,7 @@ NoContact:
     
     MsgBox (nsincontacto & " elemento/s expirado/s no tiene/n información de contacto." + vbCrLf + vbCrLf + "Se han generado " & ncorreos & " correo/s para " & nexport & " part numbers.")
     
-    'Borra los filtros y ordena los Part Numbers por orden alfabético.
+    'Clears the filters and sorts the Part Numbers by alfabetic order.
     FilterSet = Sheets(SheetName).Cells(Aux, nprodj).Value
     Call ClearFilters
     Call AlfabeticOrder
@@ -205,31 +206,29 @@ NoContact:
     
 End Sub
 
-Function MAYUSCULAS()           'Corrige el formato de los campos seleccionados.
+Function Format_Capitalization()
+'Corrects the format of the selected areas.
     
-    Dim Inicioi As Integer
+    Dim Starti As Integer
     
-    'Encuentra la posición de la columna con la palabra clave
-    'nombj = Sheets(SheetName).Range("A10:Z10").Find("Part name").Column
-    
-    For Inicioi = Aux + 1 To N
+    For Starti = Aux + 1 To N
         
-        Application.StatusBar = "Format Progress (1/3): " & Inicioi - Aux & " of " & N - Aux & ": " & Format((Inicioi - Aux) / (N - Aux), "0%")
-        Sheets(SheetName).Cells(Inicioi, nombj).Value = UCase(Sheets(SheetName).Cells(Inicioi, nombj).Value)
+        Application.StatusBar = "Format Progress (1/3): " & Starti - Aux & " of " & N - Aux & ": " & Format((Starti - Aux) / (N - Aux), "0%")
+        Sheets(SheetName).Cells(Starti, nombj).Value = UCase(Sheets(SheetName).Cells(Starti, nombj).Value)
     
     Next
     
-    For Inicioi = Aux + 1 To N
+    For Starti = Aux + 1 To N
         
-        Application.StatusBar = "Format Progress (2/3): " & Inicioi - Aux & " of " & N - Aux & ": " & Format((Inicioi - Aux) / (N - Aux), "0%")
-        Sheets(SheetName).Cells(Inicioi, matj).Value = UCase(Sheets(SheetName).Cells(Inicioi, matj).Value)
+        Application.StatusBar = "Format Progress (2/3): " & Starti - Aux & " of " & N - Aux & ": " & Format((Starti - Aux) / (N - Aux), "0%")
+        Sheets(SheetName).Cells(Starti, matj).Value = UCase(Sheets(SheetName).Cells(Starti, matj).Value)
     
     Next
     
-    For Inicioi = Aux + 1 To N
+    For Starti = Aux + 1 To N
         
-        Application.StatusBar = "Format Progress (3/3): " & Inicioi - Aux & " of " & N - Aux & ": " & Format((Inicioi - Aux) / (N - Aux), "0%")
-        Sheets(SheetName).Cells(Inicioi, manufj).Value = UCase(Sheets(SheetName).Cells(Inicioi, manufj).Value)
+        Application.StatusBar = "Format Progress (3/3): " & Starti - Aux & " of " & N - Aux & ": " & Format((Starti - Aux) / (N - Aux), "0%")
+        Sheets(SheetName).Cells(Starti, manufj).Value = UCase(Sheets(SheetName).Cells(Starti, manufj).Value)
     
     Next
     
@@ -237,18 +236,48 @@ Function MAYUSCULAS()           'Corrige el formato de los campos seleccionados.
 
 End Function
 
-Function ManufacturerContact(SheetName, i, manufj) As Integer
+Function Email_Body()
+'Gets the body information from the "Email Body" page.
     
-    ManufacturerContact = 1
+    'Public EBSubject As String
+    'Public EBHeadingEN As String
+    'Public EBFarewellEN As String
+    'Public EBSeparation As String
+    'Public EBHeadingES As String
+    'Public EBFarewellES As String
+    'Public EBSignature As String
+    
+    EBSubject = Sheets(EmailBodySheetName).Cells(EBSubjecti, EBInfoj + 1).Value
+    EBHeadingEN = Sheets(EmailBodySheetName).Cells(EBSubjecti + 1, EBInfoj + 1).Value
+    
+    EBFarewellEN = Sheets(EmailBodySheetName).Cells(EBSubjecti + 3, EBInfoj + 1).Value
+    EBSeparation = Sheets(EmailBodySheetName).Cells(EBSubjecti + 4, EBInfoj + 1).Value
+    EBHeadingES = Sheets(EmailBodySheetName).Cells(EBSubjecti + 5, EBInfoj + 1).Value
+    
+    EBFarewellES = Sheets(EmailBodySheetName).Cells(EBSubjecti + 7, EBInfoj + 1).Value
+    EBSignature = Sheets(EmailBodySheetName).Cells(EBSubjecti + 8, EBInfoj + 1).Value
+    
+    'EBHeadingEN = "Dear Supplier," + vbCrLf + vbCrLf + "With this email we inform you that the Fire & Smoke declaration under the standard EN45545-2 related to the listed MERAK part number/s supplied by you are expired or will expire shortly. We kindly ask you to provide the extension declaration dossier as soon as possible." + vbCrLf + vbCrLf + "Product information: " + vbCrLf + vbCrLf
+    'EBFarewellEN = "We remain waiting for your answer." + vbCrLf + vbCrLf + "Thank you very much in advance." + vbCrLf + vbCrLf
+    'EBSeparation = "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" + vbCrLf + vbCrLf
+    'EBHeadingES = "Estimado Proveedor," + vbCrLf + vbCrLf + "Con este correo electrónico le informamos de que su declaración de Fuegos y Humos bajo el estándar EN45545-2 en relación al listado de número/s MERAK distribuido por ustedes ha expirado o expirará pronto. Les pedimos que nos faciliten la declaración de conformidad lo antes posible." + vbCrLf + vbCrLf + "Información del producto: " + vbCrLf + vbCrLf
+    'EBFarewellES = "Esperamos su respuesta." + vbCrLf + vbCrLf + "Gracias de antemano." + vbCrLf + vbCrLf
+    'EBSignature = "MERAK Spain, S.A." + vbCrLf + "Miguel Faraday, 1" + vbCrLf + "Parque Empresarial 'La Carpetania'" + vbCrLf + "28906 Getafe (Madrid)" + vbCrLf + "mailto: f&s@merak-hvac.com"
+    
+End Function
+
+Function Manufacturer_Contact(SheetName, i, manufj) As Integer
+    
+    Manufacturer_Contact = 1
     
     manufacturer = Sheets(SheetName).Cells(i, manufj).Value
     
-    Destinatario = Sheets(SheetName).Cells(i, contactj).Value
+    Destinatario = Sheets(SheetName).Cells(i, ContactDBj).Value
     
     If Destinatario = "Does NOT Exist" Then
     
         nsincontacto = nsincontacto + 1
-        ManufacturerContact = 0
+        Manufacturer_Contact = 0
         Exit Function
         
     End If
@@ -267,13 +296,36 @@ Function ManufacturerContact(SheetName, i, manufj) As Integer
     
 End Function
 
-Function EXPORT_DATA()       'Registra la información de los correos generados. (nproducto, nombre, material, manufacturer, Destinatario, status)
+'Needs to have this line before the Call:
+'ColumnPosition = Column_Position_j
+Function Alarms_Check(i, ColumnPosition) As Integer
+'Logs the Global Status of each Part Number.
+    
+    Dim findstatus As String
+    
+    findstatus = Sheets(SheetName).Cells(i, ColumnPosition).Value
 
+    Set Alarms_Check_i = Range(Sheets(RankingStatusSheet).Cells(RSRankingi, RSStatusENj), Sheets(RankingStatusSheet).Cells(RSEndi, RSStatusENj)).Find(findstatus)
+    
+    If Alarms_Check_i Is Nothing Then
+        
+        Alarms_Check = 24
+        
+    Else
+        
+        Alarms_Check = Sheets(RankingStatusSheet).Cells(Alarms_Check_i.Row, RSRankingj).Value
+        
+    End If
+    
+End Function
+
+Function Export_Data()       'Registra la información de los correos generados. (nproducto, nombre, material, manufacturer, Destinatario, status)
+'Exporta la info de los Part numbers en los que se ha generado una notificación
     Dim expi As Integer
     
     nombre_RecordSheet = ActiveWorkbook.Name
     
-    Workbooks.Open (Sheets("Listas de Validación").Range("G2").Value)
+    Workbooks.Open (Sheets("validation Lists and Routes").Range("G2").Value)
     
     nombre_bbdd = ActiveWorkbook.Name
     
@@ -304,112 +356,10 @@ Function EXPORT_DATA()       'Registra la información de los correos generados. 
 
 End Function
 
-Function Alarmas() As Integer          'Módulo de comparación de alarmas (SheetName, i, Valj, G)
-    
-    daynum = 0
-    auxday = Split(Cells(i, G).Value, " day/s")
-    daynum = auxday(0)
-    
-    Case_Option = Sheets(SheetName).Cells(i, Valj)
-    
-    Select Case Case_Option
-           
-        Case ""
-            Alarmas = 24
-        
-        Case "No date"
-            Alarmas = 23
-           
-        Case "OK"
-            Alarmas = 22
-        
-        Case "6 month/s"
-            Alarmas = 21
-        
-        Case "5 month/s"
-            Alarmas = 21
-            
-        Case "4 month/s"
-            Alarmas = 21
-        
-        Case "3 month/s"
-            Alarmas = 18
-        
-        Case "2 month/s"
-            Alarmas = 17
-        
-        Case "1 month/s"
-            Alarmas = 16
-        
-        Case "15 day/s"
-            Alarmas = 15
-        
-        Case "14 day/s"
-            Alarmas = 14
-        
-        Case "13 day/s"
-            Alarmas = 13
-        
-        Case "12 day/s"
-            Alarmas = 12
-        
-        Case "11 day/s"
-            Alarmas = 11
-        
-        Case "10 day/s"
-            Alarmas = 10
-        
-        Case "9 day/s"
-            Alarmas = 9
-        
-        Case "8 day/s"
-            Alarmas = 8
-        
-        Case "7 day/s"
-            Alarmas = 7
-        
-        Case "6 day/s"
-            Alarmas = 6
-        
-        Case "5 day/s"
-            Alarmas = 5
-        
-        Case "4 day/s"
-            Alarmas = 4
-        
-        Case "3 day/s"
-            Alarmas = 3
-        
-        Case "2 day/s"
-            Alarmas = 2
-                
-        Case "1 day/s"
-            Alarmas = 1
-        
-        Case "EXPIRED"
-            Alarmas = 0
-    
-        Case Else        'Opciones: "---"; "PRIORITY"; Falta menos de 1 mes pero más de 15 días para expirar u otro.
-            
-            If Valj = G And daynum < 31 And daynum > 15 Then
-            
-                Alarmas = 15
-            
-            Else
-            
-                Alarmas = 24
-            
-            End If
-            
-    End Select
-    
-End Function
-
-
-Function ComplexPartNumber()
+Function Complex_Part_Number()
 '-----------------------------------------------Diversos materiales para un Part Number ------------------------------------------------
         
-    ComplexPartNumber = 1       'Marca tipo de material
+    Complex_Part_Number = 1       'Marca tipo de material
     
     nombi = Sheets(SheetName).Range(Cells(Aux, nprodj), Cells(N, nprodj)).Find(nproducto).Row
     
@@ -418,11 +368,11 @@ Function ComplexPartNumber()
         material = Sheets(SheetName).Cells(nombi, matj).Value
         material1 = Sheets(SheetName).Cells(nombi + 1, matj).Value
         
-        status = Sheets(SheetName).Cells(nombi, G)
+        status = Sheets(SheetName).Cells(nombi, GlobalStatusj)
         
         If material <> material1 And status <> "OK" Then                           'Condición para evitar la repetición de un material.
                                                        
-            Call StatusCase
+            Call Status_Case
             
         End If
        
@@ -433,16 +383,16 @@ Function ComplexPartNumber()
     material = Sheets(SheetName).Cells(nombi, matj).Value
     material1 = Sheets(SheetName).Cells(nombi - 1, matj).Value
     
-    status = Sheets(SheetName).Cells(nombi, G)
+    status = Sheets(SheetName).Cells(nombi, GlobalStatusj)
     
     'Condición para que se añada el último material del grupo.
     If (material <> material1 And nproducto = Sheets(SheetName).Cells(nombi - 1, nprodj).Value And status <> "OK") Or (material = material1 And status <> "OK") Then
                                     
         lasterror = 1       'Evita que se registre infinitamente el Part Number
         
-        status = Sheets(SheetName).Cells(nombi, G)
+        status = Sheets(SheetName).Cells(nombi, GlobalStatusj)
         
-        Call StatusCase
+        Call Status_Case
                                     
     End If
             
@@ -454,7 +404,7 @@ Function ComplexPartNumber()
     
 End Function
 
-Function StatusCase()
+Function Status_Case()
 'Bloque para generar la información del correo según su status
 
     Select Case status
@@ -481,13 +431,13 @@ Function StatusCase()
             AuxENRW = "- Raw material or product name: " & material & " (" & status & " to expire)." + vbCrLf
             InfoENRW = InfoENRW & AuxENRW
             
-            Call SpanishModule
+            Call Spanish_Module
         
     End Select
 
 End Function
 
-Function SpanishModule()
+Function Spanish_Module()
 'Bloque para poner el mensaje en Español.
     statusES = Split(status, " ")
                 
@@ -534,29 +484,29 @@ Function SpanishModule()
 End Function
 
 
-Function SimplePartNumber()
+Function Simple_Part_Number()
 '-------------------------------Si el part number solo tiene un material---------------------------------
     If nproducto <> Sheets(SheetName).Cells(i + 1, nprodj).Value Then
                         
-        status = Sheets(SheetName).Cells(i, G)
+        status = Sheets(SheetName).Cells(i, GlobalStatusj)
         
-        Call StatusCase
+        Call Status_Case
     
     End If
     
     
     Do While nproducto = Sheets(SheetName).Cells(i + 1, nprodj).Value        'En caso de que haya varias líneas para el mismo part number estas se saltan generándose un correo con la fecha más restrictiva.
 
-        status = Sheets(SheetName).Cells(i, G)
+        status = Sheets(SheetName).Cells(i, GlobalStatusj)
         
-        If status = "OK" Or (status = Sheets(SheetName).Cells(i + 1, G) And nproducto = Sheets(SheetName).Cells(i - 1, nprodj).Value) Then
+        If status = "OK" Or (status = Sheets(SheetName).Cells(i + 1, GlobalStatusj) And nproducto = Sheets(SheetName).Cells(i - 1, nprodj).Value) Then
                 
             statusES(1) = 0
             GoTo NextIterarion:
                                             
         End If
         
-        Call StatusCase
+        Call Status_Case
         
 NextIterarion:
 
@@ -566,22 +516,22 @@ NextIterarion:
         
     Loop
       
-    status = Sheets(SheetName).Cells(i, G)
+    status = Sheets(SheetName).Cells(i, GlobalStatusj)
     
     'Condición para que se analice el último material del grupo.
-    If nproducto = Sheets(SheetName).Cells(nombi - 1, nprodj).Value And status <> "OK" And status <> Sheets(SheetName).Cells(i - 1, G) Then
+    If nproducto = Sheets(SheetName).Cells(nombi - 1, nprodj).Value And status <> "OK" And status <> Sheets(SheetName).Cells(i - 1, GlobalStatusj) Then
         'STOP
-        Call StatusCase
+        Call Status_Case
                                     
     End If
 
 End Function
 
-Function EmailDisplay()
+Function Email_Display()
 
     'Encabezado correo.
     Set OutApp = CreateObject("Outlook.Application")
-    OutApp.Session.Logon
+    OutApp.session.Logon
     
     Set OutMail = OutApp.CreateItem(0)
     
@@ -593,12 +543,11 @@ Function EmailDisplay()
         .To = Destinatario
         .CC = "f&s@merak-hvac.com"
         .Attachments.Add "T:\Compartir\F&S Certificates\20150223_Manufacturer_Declaration.doc"
-        .Subject = "EN45545 Certificate update - " & manufacturer
-        .Body = EncabezadoEN & FinalInfoEN & DespedidaEN & Separacion & EncabezadoES & FinalInfoES & DespedidaES & Firma
+        .Subject = EBSubject & manufacturer
+        .Body = EBHeadingEN & FinalInfoEN & EBFarewellEN & EBSeparation & EBHeadingES & FinalInfoES & EBFarewellES & EBSignature
         .Display
         'TEST STOP
     
     End With
 
 End Function
-
