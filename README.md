@@ -145,7 +145,9 @@ Adaptación del código InfoProveedores_SAP de “BOM Check REACH format Data Ba
 	- Nuevas anotacioens para facilitar la comprensión del código.
 	- La Base de Datos de Pedidos se abre y guarda una única vez.
 
-
+- SAP_InfoProveedores:
+	- Adaptación del código usado en la BBDD de REACH.
+	- Busca y registra la info de contacto de SAP si no existe en la BBDD de contactos.
 
 
 
