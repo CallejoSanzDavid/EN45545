@@ -6,8 +6,6 @@ Option Explicit
     Public material As String           'ok
     Public nproducto As String          'ok
     Public manufacturer As String       'ok
-    'Variables Split - SpanishModule
-    'Public statusES() As String
     
     'Información del correo
     Public OutApp As Object             'ok
