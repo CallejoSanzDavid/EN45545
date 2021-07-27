@@ -3,6 +3,7 @@ Sub Check_Status()
 'Check if the certificates are OK, EXPIRED or about to EXPIRE.
 'Efficiency: 909 lines in 3:12 minutes.
 
+'<------------------------Si da error statusmin iniciarlo en GlobalEntities
     Dim i As Integer
     Dim DateT1j As Integer
     Dim Current_Date As Date
@@ -67,7 +68,7 @@ Function Check_Contacts()
         If auxmanufacturer <> manufacturer Then     'Only finds the contact info once.
             
             auxmanufacturer = manufacturer
-            Set c = Range(Sheets(ContactSheetName).Cells(CPsupplieri, CPsupplierj), Sheets(ContactSheetName).Cells(CPendi, CPsupplierj)).Find(manufacturer)
+            Set c = Range(Sheets(ContactSheetName).Cells(CPsupplieri + 1, CPsupplierj), Sheets(ContactSheetName).Cells(CPendi, CPsupplierj)).Find(manufacturer)
         
         End If
         
@@ -190,15 +191,15 @@ Function Check_Dates(i, ColumnPosition, Current_Date, status0, statusmin) As Str
 End Function
 
 'Needs to have this line before the Call:
-'ColumnPosition = GlobalStatusj
+'ColumnPosition = Column_Position_j
 Function Global_Status(i, ColumnPosition, statusmin, status0, status1)
 'Logs the Global Status of each Part Number.
     
     Sheets(SheetName).Cells(i, ColumnPosition).Value = status1
 
-    Set FindStatus = Range(Sheets(RankingStatusSheet).Cells(RSRankingi, RSStatusENj), Sheets(RankingStatusSheet).Cells(RSEndi, RSStatusENj)).Find(status1)
+    Set findstatus = Range(Sheets(RankingStatusSheet).Cells(RSRankingi, RSStatusENj), Sheets(RankingStatusSheet).Cells(RSEndi, RSStatusENj)).Find(status1)
     
-    Sheets(SheetName).Cells(i, ColumnPosition).Interior.ColorIndex = Sheets(RankingStatusSheet).Cells(FindStatus.Row, RSColorCodej).Value
+    Sheets(SheetName).Cells(i, ColumnPosition).Interior.ColorIndex = Sheets(RankingStatusSheet).Cells(findstatus.Row, RSColorCodej).Value
     
 End Function
 
