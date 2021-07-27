@@ -4,16 +4,13 @@ Option Explicit
     Public TableName As String
     Public FilterSet As String
     
-
 Sub ClearFilters()       'Borra todos los filtros.
 
     If Sheets(SheetName).FilterMode Then Sheets(SheetName).ShowAllData
 
 End Sub
 
-'Public SheetName As String             'GlobalEntities
-'Public TableName As String             'GlobalEntities
-'Public FilterSet As String             'GlobalEntities
+'SheetName = ActiveSheet.Name
 'Sheets(SheetName).Cells(i + 1, j).Select                   'Selecciona una celda dentro de la tabla donde aplicar el filtro.
 'TableName = ActiveSheet.ListObjects(1).Name                'Selecciona el nombre de la primera tabla en la hoja activa.
 'FilterSet = Sheets(SheetName).Cells(i, j).Value            'Posición del encabezado donde aplicar el filtro.
