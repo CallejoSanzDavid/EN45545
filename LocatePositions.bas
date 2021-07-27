@@ -46,6 +46,7 @@ Option Explicit
     Public RSStatusENj As Integer
     Public RSStatusESj As Integer
     Public RSColorCodej As Integer
+    
 '----------Locate_Positions_Email_Body----------
     Public EmailBodySheetName As String
     Public ws_emailb As Object
@@ -56,11 +57,9 @@ Option Explicit
     Public EBSubjectESi As Integer
     Public EBAttachmenti As Integer
     Public EBHeadingENi As Integer
-    'Public EBFinalInfoENi As Integer
     Public EBFarewellENi As Integer
     Public EBSeparationi As Integer
     Public EBHeadingESi As Integer
-    'Public EBFinalInfoESi As Integer
     Public EBFarewellESi As Integer
     Public EBSignaturei As Integer
     'Columns
@@ -103,21 +102,20 @@ Sub Locate_Positions_Contacts()
     AuxSheet = ActiveSheet.Name
     
     ContactSheetName = "Suppliers Contact Info"
-    'Set wb = ThisWorkbook
     Set ws_contact = wb.Sheets(ContactSheetName)
     
     ws_contact.Activate
     
-    CPsupplieri = ws_contact.Range("A1:Z10").Find("Supplier").Row
+    CPsupplieri = ws_contact.Range("A1:Z10").Find("Supplier").Row       '= 1
     
-    CPvendorcodej = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Vendor Code").Column
-    CPsupplierj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 100)).Find("Supplier").Column
-    CPmailj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 100)).Find("Mail").Column
-    CPtlfnoj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Telephone").Column
-    CPcountryj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Country").Column
-    CPlanguagej = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Language").Column
+    CPvendorcodej = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Vendor Code").Column      'A = 1
+    CPsupplierj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 100)).Find("Supplier").Column          'B = 2
+    CPmailj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 100)).Find("Mail").Column                  'D = 4
+    CPtlfnoj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Telephone").Column             'E = 5
+    CPcountryj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Country").Column             'F = 6
+    CPlanguagej = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Language").Column           'G = 7
     
-    CPendi = ws_contact.Cells(Rows.Count, CPsupplierj).End(xlUp).Row
+    CPendi = ws_contact.Cells(Rows.Count, CPsupplierj).End(xlUp).Row    '= 307
     
     Sheets(AuxSheet).Activate
     
@@ -132,7 +130,6 @@ Sub Locate_Positions_RankingStatus()
     AuxSheet = ActiveSheet.Name
     
     RankingStatusSheet = "Ranking Status"
-    'Set wb = ThisWorkbook
     Set ws_ranking = wb.Sheets(RankingStatusSheet)
     
     ws_ranking.Activate
@@ -159,13 +156,12 @@ Sub Locate_Positions_Email_Body()
     AuxSheet = ActiveSheet.Name
     
     EmailBodySheetName = "Email Body"
-    'Set wb = ThisWorkbook
     Set ws_emailb = wb.Sheets(EmailBodySheetName)
     
     ws_emailb.Activate
     
     EBcci = ws_emailb.Range("A1:Z10").Find("CC").Row           '= 1
-    EBccj = ws_emailb.Range(Cells(EBSubjecti, 1), Cells(EBSubjecti, 10)).Find("CC").Column     'A = 1
+    EBccj = ws_emailb.Range(Cells(EBcci, 1), Cells(EBcci, 10)).Find("CC").Column     'A = 1
     
     EBInfoj = EBccj + 1     'B = 2
     
@@ -177,13 +173,11 @@ Sub Locate_Positions_Email_Body()
     EBAttachmenti = ws_emailb.Range(Cells(EBcci, EBccj), Cells(EBEndi, EBccj)).Find("Attachment").Row       '= 4
     
     EBHeadingENi = ws_emailb.Range(Cells(EBcci, EBccj), Cells(EBEndi, EBccj)).Find("HeadingEN").Row         '= 5
-    'EBFinalInfoENi = ws_emailb.Range(Cells(EBcci, EBccj), Cells(EBEndi, EBccj)).Find("FinalInfoEN").Row     '= 6
     EBFarewellENi = ws_emailb.Range(Cells(EBcci, EBccj), Cells(EBEndi, EBccj)).Find("FarewellEN").Row       '= 7
     
     EBSeparationi = ws_emailb.Range(Cells(EBcci, EBccj), Cells(EBEndi, EBccj)).Find("Separation").Row       '= 8
     
     EBHeadingESi = ws_emailb.Range(Cells(EBcci, EBccj), Cells(EBEndi, EBccj)).Find("HeadingES").Row         '= 9
-    'EBFinalInfoESi = ws_emailb.Range(Cells(EBcci, EBccj), Cells(EBEndi, EBccj)).Find("FinalInfoES").Row     '= 10
     EBFarewellESi = ws_emailb.Range(Cells(EBcci, EBccj), Cells(EBEndi, EBccj)).Find("FarewellES").Row       '= 11
     
     EBSignaturei = ws_emailb.Range(Cells(EBcci, EBccj), Cells(EBEndi, EBccj)).Find("Signature").Row         '= 12
