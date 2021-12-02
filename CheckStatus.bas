@@ -7,20 +7,31 @@ Sub Check_Status()
     Dim i As Integer
     Dim DateT1j As Integer
     Dim Current_Date As Date
-    Dim Dif_Months As Integer
-    Dim Dif_Days As Integer
     Dim status0 As Integer
     Dim status1 As String
     Dim statusmin As Integer
+    
+    Application.StatusBar = ""
+    Application.ScreenUpdating = False
     
     Call Locate_Positions_OG
     Call Locate_Positions_RankingStatus
     
     Current_Date = Date
       
-    Sheets(SheetName).Cells(Aux + 1, TMexpirej).Select
+    ws_OG.Cells(Aux + 1, TMexpirej).Select
     
+    TableName = ActiveSheet.ListObjects(1).Name
     Call ClearFilters
+    'Sorts Part Names in Alfabetic Order.
+    FilterSet = ws_OG.Cells(Aux, nombj).Value
+    Call AlfabeticOrder
+    'Sorts Part Numbers in Alfabetic Order.
+    FilterSet = ws_OG.Cells(Aux, nprodj).Value
+    Call AlfabeticOrder
+    'Sorts Suppliers in Alfabetic Order.
+    FilterSet = ws_OG.Cells(Aux, manufj).Value
+    Call AlfabeticOrder
     
     Call Check_Contacts
     
@@ -30,7 +41,7 @@ Sub Check_Status()
         
         Application.StatusBar = "Checking Certificates Status: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
         
-        For DateT1j = Sheets(SheetName).Range("A10:DA10").Find("Date * T1").Column To DateT6j Step 6
+        For DateT1j = ws_OG.Range("A10:DA10").Find("Date * T1").Column To DateT6j Step 6
             
             status0 = 24            'Auxiliar value to prevent bugs in the comparisons
             
@@ -43,6 +54,7 @@ Sub Check_Status()
     Next
     
     Application.StatusBar = ""
+    Application.ScreenUpdating = True
     
 End Sub
 
@@ -59,7 +71,7 @@ Function Check_Contacts()
     Call Locate_Positions_Contacts
     
     auxmanufacturer = ""
-    manufacturer = Sheets(SheetName).Cells(Aux + 1, manufj).Value
+    manufacturer = ws_OG.Cells(Aux + 1, manufj).Value
     
     For m = Aux + 1 To N
         
@@ -68,14 +80,14 @@ Function Check_Contacts()
         If auxmanufacturer <> manufacturer Then     'Only finds the contact info once.
             
             auxmanufacturer = manufacturer
-            Set c = Range(Sheets(ContactSheetName).Cells(CPsupplieri + 1, CPsupplierj), Sheets(ContactSheetName).Cells(CPendi, CPsupplierj)).Find(manufacturer)
+            Set c = Range(ws_contact.Cells(CPsupplieri + 1, CPsupplierj), ws_contact.Cells(CPendi, CPsupplierj)).Find(manufacturer)
         
         End If
         
         If c Is Nothing Then                        'No contact info.
         
-            Sheets(SheetName).Cells(m, ContactDBj) = "Does NOT Exist"
-            Sheets(SheetName).Cells(m, ContactDBj).Interior.ColorIndex = 3
+            ws_OG.Cells(m, ContactDBj) = "Does NOT Exist"
+            ws_OG.Cells(m, ContactDBj).Interior.ColorIndex = 3
         
             linea = 0
             
@@ -83,10 +95,10 @@ Function Check_Contacts()
         
             linea = c.Row
             
-            If Sheets(ContactSheetName).Cells(linea, CPmailj) = "" Then     'Exists the Provider in the list but has no contact info.
+            If ws_contact.Cells(linea, CPmailj) = "" Then     'Exists the Provider in the list but has no contact info.
             
-                Sheets(SheetName).Cells(m, ContactDBj) = "Does NOT Exist"
-                Sheets(SheetName).Cells(m, ContactDBj).Interior.ColorIndex = 3
+                ws_OG.Cells(m, ContactDBj) = "Does NOT Exist"
+                ws_OG.Cells(m, ContactDBj).Interior.ColorIndex = 3
                 
                 linea = 0
                 
@@ -96,12 +108,12 @@ Function Check_Contacts()
         
         If linea <> 0 Then      'Exists contact info.
                 
-            Sheets(SheetName).Cells(m, ContactDBj) = Sheets(ContactSheetName).Cells(linea, CPmailj)
-            Sheets(SheetName).Cells(m, ContactDBj).Interior.ColorIndex = 43
+            ws_OG.Cells(m, ContactDBj) = ws_contact.Cells(linea, CPmailj)
+            ws_OG.Cells(m, ContactDBj).Interior.ColorIndex = 43
              
         End If
         
-        manufacturer = Sheets(SheetName).Cells(m + 1, manufj).Value
+        manufacturer = ws_OG.Cells(m + 1, manufj).Value
         
     Next
     
@@ -117,7 +129,7 @@ Function Identify_Status(i, DateT1j, Current_Date, status0, statusmin)
     ColumnPosition = DateT1j
     status1 = Check_Dates(i, ColumnPosition, Current_Date, status0, statusmin)
     
-    If status0 <> 23 And Sheets(SheetName).Cells(i, ManufDeclarationj) <> "" And IsDate(Sheets(SheetName).Cells(i, ManufDeclarationj)) Then
+    If status0 <> 23 And ws_OG.Cells(i, ManufDeclarationj) <> "" And IsDate(ws_OG.Cells(i, ManufDeclarationj)) Then
         
         ColumnPosition = ManufDeclarationj
         status1 = Check_Dates(i, ColumnPosition, Current_Date, status0, statusmin)
@@ -125,13 +137,13 @@ Function Identify_Status(i, DateT1j, Current_Date, status0, statusmin)
     End If
         
     ColumnPosition = TMexpirej
-    Call Global_Status(i, ColumnPosition, statusmin, status0, status1)
+    Call Log_Status(i, ColumnPosition, statusmin, status0, status1)
     
     If status0 < statusmin Then
         
         statusmin = status0        'Logs the new minimum status.
         ColumnPosition = GlobalStatusj
-        Call Global_Status(i, ColumnPosition, statusmin, status0, status1)
+        Call Log_Status(i, ColumnPosition, statusmin, status0, status1)
     
     End If
     
@@ -139,11 +151,14 @@ End Function
 
 Function Check_Dates(i, ColumnPosition, Current_Date, status0, statusmin) As String
 'Compares the Certificates and Manufacturers' declarations dates and logs the Part Number status.
-
-    If Sheets(SheetName).Cells(i, ColumnPosition) <> "" And IsDate(Sheets(SheetName).Cells(i, ColumnPosition)) Then
     
-        Dif_Months = 60 - DateDiff("m", Sheets(SheetName).Cells(i, ColumnPosition), Current_Date)
-        Dif_Days = 1827 - DateDiff("d", Sheets(SheetName).Cells(i, ColumnPosition), Current_Date)
+    Dim Dif_Months As Integer
+    Dim Dif_Days As Integer
+    
+    If ws_OG.Cells(i, ColumnPosition) <> "" And IsDate(ws_OG.Cells(i, ColumnPosition)) Then
+    
+        Dif_Months = 60 - DateDiff("m", ws_OG.Cells(i, ColumnPosition), Current_Date)
+        Dif_Days = 1827 - DateDiff("d", ws_OG.Cells(i, ColumnPosition), Current_Date)
     
     Else
 
@@ -192,22 +207,22 @@ End Function
 
 'Needs to have this line before the Call:
 'ColumnPosition = Column_Position_j
-Function Global_Status(i, ColumnPosition, statusmin, status0, status1)
+Function Log_Status(i, ColumnPosition, statusmin, status0, status1)
 'Logs the Global Status of each Part Number.
     
-    Sheets(SheetName).Cells(i, ColumnPosition).Value = status1
+    ws_OG.Cells(i, ColumnPosition).Value = status1
 
-    Set findstatus = Range(Sheets(RankingStatusSheet).Cells(RSRankingi, RSStatusENj), Sheets(RankingStatusSheet).Cells(RSEndi, RSStatusENj)).Find(status1)
+    Set findstatus = Range(ws_ranking.Cells(RSRankingi, RSStatusENj), ws_ranking.Cells(RSEndi, RSStatusENj)).Find(status1)
     
-    Sheets(SheetName).Cells(i, ColumnPosition).Interior.ColorIndex = Sheets(RankingStatusSheet).Cells(findstatus.Row, RSColorCodej).Value
+    ws_OG.Cells(i, ColumnPosition).Interior.ColorIndex = ws_ranking.Cells(findstatus.Row, RSColorCodej).Value
     
 End Function
 
 Function Counters_Check()
 'Adds or resets counters
-    If TMexpirej = Sheets(SheetName).Range("A10:DA10").Find("Test Method 1 time to expire*").Column + 5 Then
+    If TMexpirej = ws_OG.Range("A10:DA10").Find("Test Method 1 time to expire*").Column + 5 Then
 
-        TMexpirej = Sheets(SheetName).Range("A10:DA10").Find("Test Method 1 time to expire*").Column
+        TMexpirej = ws_OG.Range("A10:DA10").Find("Test Method 1 time to expire*").Column
         
     Else
     
