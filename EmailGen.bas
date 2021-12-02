@@ -10,6 +10,7 @@ Sub Email_Gen()
     Dim Export As Integer
     Dim NoContact As Integer
     Dim validation As Integer
+    Dim marc1 As Integer
     'splitters
     Dim Auxsplit As String
     Dim auxname() As String
@@ -19,6 +20,9 @@ Sub Email_Gen()
     Dim ColumnPosition As Integer
     Dim status As String
     Dim statusmin As Integer
+    'variables
+    Dim expstatus As String
+    
     'workbooks names
     Dim partname_RecordSheet As String
     Dim partname_bbdd As String
@@ -27,7 +31,7 @@ Sub Email_Gen()
     Dim InfoES As String
     Dim FinalInfoEN As String
     Dim FinalInfoES As String
-                        
+    
     Application.StatusBar = ""
     Application.ScreenUpdating = False
     
@@ -170,40 +174,34 @@ ErrorHandler:
                         
                 End Select
                 
-                Export = 1
-                
                 FinalInfoEN = FinalInfoEN & InfoEN & InfoENRW + vbCrLf
                 FinalInfoES = FinalInfoES & InfoES & InfoESRW + vbCrLf
                 
                 InfoENRW = ""
                 InfoESRW = ""
                 
-                If Export = 1 Then         'A new line is loged for each Part Number in the Data Base "Pedidos".
+                If OpenDatabase = 0 Then
+                
+                    partname_RecordSheet = ActiveWorkbook.Name
                     
-                    If OpenDatabase = 0 Then
+                    Workbooks.Open (Sheets("Validation Lists and Routes").Range("I2").Value)
                     
-                        partname_RecordSheet = ActiveWorkbook.Name
-                        
-                        Workbooks.Open (Sheets("Validation Lists and Routes").Range("G2").Value)
-                        
-                        partname_bbdd = ActiveWorkbook.Name
-                        
-                        OpenDatabase = 1
-                        
-                    End If
+                    partname_bbdd = ActiveWorkbook.Name
                     
-                    Call Export_Data(partname_RecordSheet, partname_bbdd, partname, expstatus)
-                    Workbooks(partname_RecordSheet).Activate
+                    OpenDatabase = 1
                     
-                    nexport = nexport + 1
-                    
-                    If manufacturer = ws_OG.Cells(i + 1, manufj).Value Then
-                    
-                        i = i + 1               'With this line we prevent the code to analize the last line again.
-                        GoTo NextPartNumber:    'Starts the loop again skipping the "Manufacturer_Contact" function.
-                    
-                    End If
-                    
+                End If
+                
+                Export = Export_Data(partname_RecordSheet, partname_bbdd, partname, expstatus)
+                Workbooks(partname_RecordSheet).Activate
+                
+                nexport = nexport + 1
+                
+                If manufacturer = ws_OG.Cells(i + 1, manufj).Value Then
+                
+                    i = i + 1               'With this line we prevent the code to analize the last line again.
+                    GoTo NextPartNumber:    'Starts the loop again skipping the "Manufacturer_Contact" function.
+                
                 End If
                 
             End If
@@ -302,8 +300,6 @@ Function Manufacturer_Contact(i, nnocontact) As Integer
     
     Dim CPmaili As Integer
     
-    Manufacturer_Contact = 1
-    
     manufacturer = ws_OG.Cells(i, manufj).Value
     
     Recipient = ws_OG.Cells(i, ContactDBj).Value
@@ -315,6 +311,8 @@ Function Manufacturer_Contact(i, nnocontact) As Integer
         Exit Function
         
     End If
+    
+    Manufacturer_Contact = 1
     
     ws_contact.Activate   'To prevent an error in the next code line, we activate the Sheet.
     CPmaili = ws_contact.Range(Cells(1, CPmailj), Cells(CPendi, CPmailj)).Find(Recipient).Row
@@ -387,7 +385,7 @@ Function Complex_Part_Number(pnamei, i) As Integer
     status = ws_OG.Cells(pnamei, GlobalStatusj)
     
     'Condition to add the last material of the Part number.
-    If (material <> material1 And nproducto = ws_OG.Cells(pnamei - 1, nprodj).Value And status <> "OK") Or (material = material1 And status <> "OK") Then
+    If nproducto = ws_OG.Cells(pnamei - 1, nprodj).Value And status <> "OK" Then
                                     
         lasterror = 1       'Prevents the part number to be loged infinetly.
         
@@ -535,7 +533,7 @@ Function Spanish_Module(status, statusES)
 
 End Function
 
-Function Export_Data(partname_RecordSheet, partname_bbdd, partname, expstatus)
+Function Export_Data(partname_RecordSheet, partname_bbdd, partname, expstatus) As Integer
 'Exports to the "PEDIDOS" Data Base the info for the notified Part Numbers.
     Dim expi As Integer
     
@@ -559,7 +557,9 @@ Function Export_Data(partname_RecordSheet, partname_bbdd, partname, expstatus)
     Workbooks(partname_bbdd).Sheets("AUX2").Range("A1").Copy Range("J" & expi)            'Validation list.
     
     Workbooks(partname_bbdd).Sheets("TEMP").Cells(expi, 11).Value = expstatus             'Test Reports status.
-
+    
+    Export_Data = 1
+    
 End Function
 
 Function Email_Display(FinalInfoEN, FinalInfoES)
@@ -576,12 +576,12 @@ Function Email_Display(FinalInfoEN, FinalInfoES)
         
         Select Case language
                     
-            Case "Spanish"       'If the language is Spanish
+            Case "SPANISH"       'If the language is Spanish
                               
                 .Subject = EBSubjectES & manufacturer
                 .Body = EBHeadingES & FinalInfoES & EBFarewellES & EBSignature
                               
-            Case "English"       'If the language is English"
+            Case "ENGLISH"       'If the language is English"
                 
                 .Subject = EBSubjectEN & manufacturer
                 .Body = EBHeadingEN & FinalInfoEN & EBFarewellEN & EBSignature
