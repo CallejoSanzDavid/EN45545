@@ -6,7 +6,7 @@ Option Explicit
     
 Sub ClearFilters()       'Borra todos los filtros.
 
-    If Sheets(SheetName).FilterMode Then Sheets(SheetName).ShowAllData
+    If ActiveSheet.FilterMode Then ActiveSheet.ShowAllData
 
 End Sub
 
