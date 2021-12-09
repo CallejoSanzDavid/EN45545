@@ -35,6 +35,8 @@ Sub Email_Gen()
     Application.StatusBar = ""
     Application.ScreenUpdating = False
     
+    t1 = Time
+    
     Call Locate_Positions_OG
     
     '<-----------------------------------
@@ -78,11 +80,19 @@ NextPartNumber:
         
         Application.StatusBar = "Checking expired certificates and generating emails: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
         
+        If i = 991 Then
+        
+              i = i
+        
+        End If
+        
         ColumnPosition = GlobalStatusj
         statusmin = Alarms_Check(i, ColumnPosition)
         
         ColumnPosition = EmailSendedj
         validation = Alarms_Check(i, ColumnPosition)
+        
+        
         
         'flags initial values
         stat = 3                'flag to identify the minimum status.
@@ -133,77 +143,74 @@ ErrorHandler:
             
             material = ws_OG.Cells(i, matj).Value
                          
-            If manufacturer = ws_OG.Cells(i + 1, manufj).Value Then   'If the next supplier is the same.
+            
+            status = ws_OG.Cells(i, GlobalStatusj)
+            pnamei = ws_OG.Range(Cells(Aux, nprodj), Cells(N, nprodj)).Find(nproducto).Row
+            
+            '-------------------------------Part Numbers with several materials---------------------------------
+            If Auxsplit <> "0" And status <> "OK" Then
                 
-                status = ws_OG.Cells(i, GlobalStatusj)
-                pnamei = ws_OG.Range(Cells(Aux, nprodj), Cells(N, nprodj)).Find(nproducto).Row
-                
-                '-------------------------------Part Numbers with several materials---------------------------------
-                If Auxsplit <> "0" And status <> "OK" Then
+                i = Complex_Part_Number(pnamei, i)
+                marc1 = 1       'flag value for Part Number type
                     
-                    i = Complex_Part_Number(pnamei, i)
-                    marc1 = 1       'flag value for Part Number type
-                        
-                End If
+            End If
+                
+            '-------------------------------Part Numbers with one material---------------------------------
+            If Auxsplit = "0" And marc1 = 0 And status <> "OK" Then
+                                        
+                i = Simple_Part_Number(pnamei, i)
+                
+            End If
+            
+            Select Case stat
+                
+                Case 2        'Days left for the certificate to expire.
+                    InfoEN = "- MERAK part number: " & nproducto & "." + vbCrLf + "- MERAK part name: " & partname & " (" & auxstatus & " day/s to expire)." + vbCrLf
+                    InfoES = "- Número del elemento de MERAK: " & nproducto & "." + vbCrLf + "- Nombre del elemento MERAK: " & partname & " (" & auxstatus & " día/s para expirar)." + vbCrLf
+                    expstatus = auxstatus & " día/s para expirar"
+                                  
+                Case 1        'Months left for the certificate to expire.
                     
-                '-------------------------------Part Numbers with one material---------------------------------
-                If Auxsplit = "0" And marc1 = 0 And status <> "OK" Then
-                                            
-                    i = Simple_Part_Number(pnamei, i)
+                    InfoEN = "- MERAK part number: " & nproducto & "." + vbCrLf + "- MERAK part name: " & partname & " (" & auxstatus & " month/s to expire)." + vbCrLf
+                    InfoES = "- Número del elemento de MERAK: " & nproducto & "." + vbCrLf + "- Nombre del elemento MERAK: " & partname & " (" & auxstatus & " mes/es para expirar)." + vbCrLf
+                    expstatus = auxstatus & " mes/es para expirar"
                     
-                End If
-                
-                Select Case stat
+                Case 0        'Any of the materials has expired.
                     
-                    Case 2        'Days left for the certificate to expire.
-                        InfoEN = "- MERAK part number: " & nproducto & "." + vbCrLf + "- MERAK part name: " & partname & " (" & auxstatus & " day/s to expire)." + vbCrLf
-                        InfoES = "- Número del elemento de MERAK: " & nproducto & "." + vbCrLf + "- Nombre del elemento MERAK: " & partname & " (" & auxstatus & " día/s para expirar)." + vbCrLf
-                        expstatus = auxstatus & " día/s para expirar"
-                                      
-                    Case 1        'Months left for the certificate to expire.
-                        
-                        InfoEN = "- MERAK part number: " & nproducto & "." + vbCrLf + "- MERAK part name: " & partname & " (" & auxstatus & " month/s to expire)." + vbCrLf
-                        InfoES = "- Número del elemento de MERAK: " & nproducto & "." + vbCrLf + "- Nombre del elemento MERAK: " & partname & " (" & auxstatus & " mes/es para expirar)." + vbCrLf
-                        expstatus = auxstatus & " mes/es para expirar"
-                        
-                    Case 0        'Any of the materials has expired.
-                        
-                        InfoEN = "- MERAK part number: " & nproducto & "." + vbCrLf + "- MERAK part name: " & partname & " (EXPIRED)." + vbCrLf
-                        InfoES = "- Número del elemento de MERAK: " & nproducto & "." + vbCrLf + "- Nombre del elemento MERAK: " & partname & " (EXPIRADO)." + vbCrLf
-                        expstatus = "EXPIRADO"
-                        
-                End Select
-                
-                FinalInfoEN = FinalInfoEN & InfoEN & InfoENRW + vbCrLf
-                FinalInfoES = FinalInfoES & InfoES & InfoESRW + vbCrLf
-                
-                InfoENRW = ""
-                InfoESRW = ""
-                
-                If OpenDatabase = 0 Then
-                
-                    partname_RecordSheet = ActiveWorkbook.Name
+                    InfoEN = "- MERAK part number: " & nproducto & "." + vbCrLf + "- MERAK part name: " & partname & " (EXPIRED)." + vbCrLf
+                    InfoES = "- Número del elemento de MERAK: " & nproducto & "." + vbCrLf + "- Nombre del elemento MERAK: " & partname & " (EXPIRADO)." + vbCrLf
+                    expstatus = "EXPIRADO"
                     
-                    Workbooks.Open (Sheets("Validation Lists and Routes").Range("I2").Value)
-                    
-                    partname_bbdd = ActiveWorkbook.Name
-                    
-                    OpenDatabase = 1
-                    
-                End If
+            End Select
+            
+            FinalInfoEN = FinalInfoEN & InfoEN & InfoENRW + vbCrLf
+            FinalInfoES = FinalInfoES & InfoES & InfoESRW + vbCrLf
+            
+            InfoENRW = ""
+            InfoESRW = ""
+            
+            If OpenDatabase = 0 Then
+            
+                partname_RecordSheet = ActiveWorkbook.Name
                 
-                Export = Export_Data(partname_RecordSheet, partname_bbdd, partname, expstatus)
-                Workbooks(partname_RecordSheet).Activate
+                Workbooks.Open (Sheets("Validation Lists and Routes").Range("I2").Value)
                 
-                nexport = nexport + 1
+                partname_bbdd = ActiveWorkbook.Name
                 
-                If manufacturer = ws_OG.Cells(i + 1, manufj).Value Then
+                OpenDatabase = 1
                 
-                    i = i + 1               'With this line we prevent the code to analize the last line again.
-                    GoTo NextPartNumber:    'Starts the loop again skipping the "Manufacturer_Contact" function.
-                
-                End If
-                
+            End If
+            
+            Export = Export_Data(partname_RecordSheet, partname_bbdd, partname, expstatus)
+            Workbooks(partname_RecordSheet).Activate
+            
+            nexport = nexport + 1
+            
+            If manufacturer = ws_OG.Cells(i + 1, manufj).Value Then
+            
+                i = i + 1               'With this line we prevent the code to analize the last line again.
+                GoTo NextPartNumber:    'Starts the loop again skipping the "Manufacturer_Contact" function.
+            
             End If
                 
         End If
@@ -232,12 +239,15 @@ NoContact:
     
     Workbooks(partname_RecordSheet).Activate
     
-    MsgBox (nnocontact & " elemento/s expirado/s no tiene/n información de contacto." + vbCrLf + vbCrLf + "Se han generado " & nmails & " correo/s para " & nexport & " part numbers.")
-    
     'Clears the filters and sorts the Part Numbers by alfabetic order.
     FilterSet = ws_OG.Cells(Aux, nprodj).Value
     Call ClearFilters
     Call AlfabeticOrder
+    
+    t2 = Time
+    crono = Format(t2 - t1, "hh:mm:ss")
+    
+    MsgBox (nnocontact & " elemento/s expirado/s no tiene/n información de contacto." + vbCrLf + vbCrLf + "Se han generado " & nmails & " correo/s para " & nexport & " part numbers." + vbCrLf + vbCrLf + "Tiempo de operación: " & crono & ".")
     
     Application.StatusBar = ""
     Application.ScreenUpdating = True
@@ -315,8 +325,24 @@ Function Manufacturer_Contact(i, nnocontact) As Integer
     Manufacturer_Contact = 1
     
     ws_contact.Activate   'To prevent an error in the next code line, we activate the Sheet.
-    CPmaili = ws_contact.Range(Cells(1, CPmailj), Cells(CPendi, CPmailj)).Find(Recipient).Row
     
+    On Error GoTo ErrorHandler1:
+    
+    CPmaili = ws_contact.Range(Cells(1, CPmailj), Cells(CPendi, CPmailj)).Find(Recipient).Row
+            
+ErrorHandler1:
+            
+    If Err.Number = 91 Then      'Solution for error 9: Subindex out of interval.
+
+        Call ClearFilters
+        CPmaili = ws_contact.Range(Cells(1, CPmailj), Cells(CPendi, CPmailj)).Find(Recipient).Row
+        Err.Clear               'Error solved.
+        Resume ErrorHandler1:
+        
+    End If
+    
+    On Error GoTo 0
+
     language = Trim(ws_contact.Cells(CPmaili, CPlanguagej).Value)
     
     Do While Recipient <> "Does NOT Exist" And ws_contact.Cells(CPmaili, CPsupplierj).Value = ws_contact.Cells(CPmaili + 1, CPsupplierj).Value
@@ -359,6 +385,7 @@ Function Complex_Part_Number(pnamei, i) As Integer
 '-----------------------------------------------Part Numbers with several materials------------------------------------------------
     Dim lasterror As Integer
     Dim material1 As String
+    Dim status1 As String
     
     lasterror = 0           'flag to prevent the error in which the last lines are not loged if it's not OK or are the same material.
     
@@ -368,8 +395,10 @@ Function Complex_Part_Number(pnamei, i) As Integer
         material1 = ws_OG.Cells(pnamei + 1, matj).Value
         
         status = ws_OG.Cells(pnamei, GlobalStatusj)
+        status1 = ws_OG.Cells(pnamei + 1, GlobalStatusj)
         
-        If material <> material1 And status <> "OK" Then                                'Condition to prevent the repetition of a material.
+        If ((material <> material1) Or (material = material1 And status <> status1)) And status <> "OK" Then
+        'Condition to prevent the repetition of a material.
                                                        
             Call Status_Case(status, statusES)
             
