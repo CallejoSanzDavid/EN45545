@@ -14,6 +14,8 @@ Sub Check_Status()
     Application.StatusBar = ""
     Application.ScreenUpdating = False
     
+    t1 = Time
+    
     Call Locate_Positions_OG
     Call Locate_Positions_RankingStatus
     
@@ -21,16 +23,10 @@ Sub Check_Status()
       
     ws_OG.Cells(Aux + 1, TMexpirej).Select
     
+    'Clears the filters and sorts the Part Numbers by alfabetic order.
     TableName = ActiveSheet.ListObjects(1).Name
-    Call ClearFilters
-    'Sorts Part Names in Alfabetic Order.
-    FilterSet = ws_OG.Cells(Aux, nombj).Value
-    Call AlfabeticOrder
-    'Sorts Part Numbers in Alfabetic Order.
     FilterSet = ws_OG.Cells(Aux, nprodj).Value
-    Call AlfabeticOrder
-    'Sorts Suppliers in Alfabetic Order.
-    FilterSet = ws_OG.Cells(Aux, manufj).Value
+    Call ClearFilters
     Call AlfabeticOrder
     
     Call Check_Contacts
@@ -52,6 +48,11 @@ Sub Check_Status()
         Next
         
     Next
+    
+    t2 = Time
+    crono = Format(t2 - t1, "hh:mm:ss")
+    
+    MsgBox ("Operación ejecutada con éxito." + vbCrLf + vbCrLf + "Tiempo de operación: " & crono & ".")
     
     Application.StatusBar = ""
     Application.ScreenUpdating = True
