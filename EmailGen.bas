@@ -80,12 +80,6 @@ NextPartNumber:
         
         Application.StatusBar = "Checking expired certificates and generating emails: " & i - Aux & " of " & N - Aux & ": " & Format((i - Aux) / (N - Aux), "0%")
         
-        If i = 991 Then
-        
-              i = i
-        
-        End If
-        
         ColumnPosition = GlobalStatusj
         statusmin = Alarms_Check(i, ColumnPosition)
         
@@ -141,12 +135,6 @@ ErrorHandler:
             
             On Error GoTo 0
             
-            If ws_OG.Cells(i, manufj) = "ERNI ELECTRONICS" Then
-                
-                i = i
-            
-            End If
-            
             material = ws_OG.Cells(i, matj).Value
             
             status = ws_OG.Cells(i, GlobalStatusj)
@@ -163,7 +151,7 @@ ErrorHandler:
             '-------------------------------Part Numbers with one material---------------------------------
             If Auxsplit = "0" And marc1 = 0 And status <> "OK" Then
                                         
-                i = Simple_Part_Number(i)               'pnamei
+                i = Simple_Part_Number(i)
                 
             End If
             
