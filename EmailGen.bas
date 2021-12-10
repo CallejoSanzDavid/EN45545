@@ -141,8 +141,13 @@ ErrorHandler:
             
             On Error GoTo 0
             
+            If ws_OG.Cells(i, manufj) = "ERNI ELECTRONICS" Then
+                
+                i = i
+            
+            End If
+            
             material = ws_OG.Cells(i, matj).Value
-                         
             
             status = ws_OG.Cells(i, GlobalStatusj)
             pnamei = ws_OG.Range(Cells(Aux, nprodj), Cells(N, nprodj)).Find(nproducto).Row
@@ -158,7 +163,7 @@ ErrorHandler:
             '-------------------------------Part Numbers with one material---------------------------------
             If Auxsplit = "0" And marc1 = 0 And status <> "OK" Then
                                         
-                i = Simple_Part_Number(pnamei, i)
+                i = Simple_Part_Number(i)               'pnamei
                 
             End If
             
@@ -400,7 +405,7 @@ Function Complex_Part_Number(pnamei, i) As Integer
         If ((material <> material1) Or (material = material1 And status <> status1)) And status <> "OK" Then
         'Condition to prevent the repetition of a material.
                                                        
-            Call Status_Case(status, statusES)
+            Call Status_Case(status)
             
         End If
        
@@ -420,7 +425,7 @@ Function Complex_Part_Number(pnamei, i) As Integer
         
         status = ws_OG.Cells(pnamei, GlobalStatusj)
         
-        Call Status_Case(status, statusES)
+        Call Status_Case(status)
                                     
     End If
             
@@ -432,30 +437,28 @@ Function Complex_Part_Number(pnamei, i) As Integer
     
 End Function
 
-Function Simple_Part_Number(pnamei, i) As Integer
+Function Simple_Part_Number(i) As Integer
 
 '-------------------------------Part Numbers with one material---------------------------------
     If nproducto <> ws_OG.Cells(i + 1, nprodj).Value Then
                         
         status = ws_OG.Cells(i, GlobalStatusj)
         
-        Call Status_Case(status, statusES)
+        Call Status_Case(status)
     
     End If
-    
     
     Do While nproducto = ws_OG.Cells(i + 1, nprodj).Value        'In case there are several lines for the same Part Number, only logs the most restrictive.
 
         status = ws_OG.Cells(i, GlobalStatusj)
         
-        If status = "OK" Or (status = ws_OG.Cells(i + 1, GlobalStatusj) And nproducto = ws_OG.Cells(i - 1, nprodj).Value) Then
+        If status = "OK" Or (status = ws_OG.Cells(i - 1, GlobalStatusj) And nproducto = ws_OG.Cells(i - 1, nprodj).Value) Then
                 
-            statusES(1) = 0
             GoTo NextIterarion:
                                             
         End If
         
-        Call Status_Case(status, statusES)
+        Call Status_Case(status)
         
 NextIterarion:
 
@@ -468,9 +471,9 @@ NextIterarion:
     status = ws_OG.Cells(i, GlobalStatusj)
     
     'Condition to log last material.
-    If nproducto = ws_OG.Cells(pnamei - 1, nprodj).Value And status <> "OK" And status <> ws_OG.Cells(i - 1, GlobalStatusj) Then
+    If nproducto = ws_OG.Cells(i - 1, nprodj).Value And status <> "OK" And status <> ws_OG.Cells(i - 1, GlobalStatusj) Then
 
-        Call Status_Case(status, statusES)
+        Call Status_Case(status)
                                     
     End If
     
@@ -478,7 +481,7 @@ NextIterarion:
     
 End Function
 
-Function Status_Case(status, statusES)
+Function Status_Case(status)
 'Funtion to generate the information of the expired or about to expire material according to its status.
 
     Dim AuxENRW As String
@@ -491,7 +494,7 @@ Function Status_Case(status, statusES)
             AuxENRW = "- Raw material or product name: " & material & " (" & status & ")." + vbCrLf
             InfoENRW = InfoENRW & AuxENRW
         
-            AuxESRW = "- Materia prima o partname del producto: " & material & " (EXPIRADO)." + vbCrLf
+            AuxESRW = "- Materia prima o part name del producto: " & material & " (EXPIRADO)." + vbCrLf
             InfoESRW = InfoESRW & AuxESRW
             
             auxstatus = 0
@@ -501,24 +504,25 @@ Function Status_Case(status, statusES)
             AuxENRW = "- Raw material or product name: " & material & " (" & status & ")." + vbCrLf
             InfoENRW = InfoENRW & AuxENRW
 
-            AuxESRW = "- Materia prima o partname del producto: " & material & " (Sin fecha)." + vbCrLf
+            AuxESRW = "- Materia prima o part name del producto: " & material & " (Sin fecha)." + vbCrLf
             InfoESRW = InfoESRW & AuxESRW
             
         Case Else           'When the certificates have months or days to expire left.
             AuxENRW = "- Raw material or product name: " & material & " (" & status & " to expire)." + vbCrLf
             InfoENRW = InfoENRW & AuxENRW
             
-            Call Spanish_Module(status, statusES)
+            Call Spanish_Module(status)
         
     End Select
 
 End Function
 
-Function Spanish_Module(status, statusES)
+Function Spanish_Module(status)
 'Function to log the info in spanish.
 
     Dim AuxESRW As String
-
+    Dim statusES() As String
+    
     statusES = Split(status, " ")
                 
     If statusES(1) = "day/s" Then
@@ -541,14 +545,14 @@ Function Spanish_Module(status, statusES)
                                                     
         End If
         
-        AuxESRW = "- Materia prima o partname del producto: " & material & " (" & statusES(0) & " día/s para expirar)." + vbCrLf
+        AuxESRW = "- Materia prima o part name del producto: " & material & " (" & statusES(0) & " día/s para expirar)." + vbCrLf
         InfoESRW = InfoESRW & AuxESRW
         
     End If
         
     If statusES(1) = "month/s" Then
         
-        AuxESRW = "- Materia prima o partname del producto: " & material & " (" & statusES(0) & " mes/es para expirar)." + vbCrLf
+        AuxESRW = "- Materia prima o part name del producto: " & material & " (" & statusES(0) & " mes/es para expirar)." + vbCrLf
         InfoESRW = InfoESRW & AuxESRW
         
         If statusES(0) < auxstatus And stat <> 0 And stat <> 2 Then     'Updates the global status to months.
