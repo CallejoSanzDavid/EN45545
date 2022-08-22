@@ -1,4 +1,4 @@
-Attribute VB_Name = "LocatePositions_Contacts"
+Attribute VB_Name = "LocatePositions"
 Option Explicit
     
     Public wb As Workbook
@@ -25,95 +25,94 @@ Option Explicit
     Public ws_OG As Object
     Public wb_OG As String
     'Rows
-    Public Aux As Integer   'Initial
+    Public Auxi As Integer   'Initial
     Public N As Integer     'Final
     'Columns
     Public nprodj As Integer
-    Public nombj As Integer
-    Public matj As Integer
     Public manufj As Integer
-    Public DateT6j As Integer
-    Public ManufDeclarationj As Integer
-    Public GlobalStatusj As Integer
-    Public TMexpirej As Integer
-    Public ContactDBj As Integer
-    Public EmailSendedj As Integer
   
-Sub Locate_Positions_OG()
-'Locates the necesary positions in the current activated sheet for the correct function of the code.
-'OG: OriGinal -> Page from where the macros are initiated.
+Sub Locate_Positions_CP()
+'Localiza las posiciones necesarias enla hoja activa para el correcto funcionamiento del código.
+'CP: Contact Page.
 
     SheetName = ActiveSheet.Name
     
     Set wb = ThisWorkbook
     Set ws_contact = wb.Sheets(SheetName)
+        
+    CPsupplieri = Find_Row(0, "Supplier", SheetName)
+    CPAuxi = CPsupplieri + 1
     
-    CPsupplieri = ws_contact.Range("A1:Z10").Find("Supplier").Row   '= 1
-    CPAuxi = CPsupplieri + 1                                        '= 2
-    
-    CPvendorcodej = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Vendor Code").Column  'A = 1
+    CPvendorcodej = Find_Column(CPsupplieri, "Vendor Code", SheetName)
     'Obtiene la letra de la columna.
     NC_CPvendorcodej = Mid(ws_contact.Cells(CPsupplieri, CPvendorcodej).Address, 2, InStr(2, ws_contact.Cells(CPsupplieri, CPvendorcodej).Address, "$") - 2) '= A
     
-    CPsupplierj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 100)).Find("Supplier").Column      'B = 2
-    CPmailj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 100)).Find("Mail").Column              'D = 4
-    CPtlfnoj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Telephone").Column         'E = 5
-    CPcountryj = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Country").Column         'F = 6
-    CPlanguagej = ws_contact.Range(Cells(CPsupplieri, 1), Cells(CPsupplieri, 10)).Find("Language").Column       'G = 7
+    CPsupplierj = Find_Column(CPsupplieri, "Supplier", SheetName)
+    CPmailj = Find_Column(CPsupplieri, "Mail", SheetName)
+    CPtlfnoj = Find_Column(CPsupplieri, "Telephone", SheetName)
+    CPcountryj = Find_Column(CPsupplieri, "Country", SheetName)
+    CPlanguagej = Find_Column(CPsupplieri, "Language", SheetName)
     
-    CPOKj = ws_contact.Range("A1:Z1").Find("OK/NOK").Column                                                     'H = 8
+    CPOKj = Find_Column(CPsupplieri, "OK/NOK", SheetName)
     'Obtiene la letra de la columna.
     NC_CPOKj = Mid(ws_contact.Cells(CPsupplieri, CPOKj).Address, 2, InStr(2, ws_contact.Cells(CPsupplieri, CPOKj).Address, "$") - 2) '= H
     
-    CPendi = ws_contact.Cells(Rows.Count, CPsupplierj).End(xlUp).Row    '= 307
+    CPendi = ws_contact.Cells(Rows.Count, CPsupplierj).End(xlUp).Row
     
 End Sub
 
 Sub Locate_Positions_DDBB()
-'Locates the necesary positions for the correct function of the code.
-'CP: Contact Page.
+'Localiza las posiciones necesarias enla hoja activa para el correcto funcionamiento del código.
+'OG: OriGinal -> Página FCIL de BBDD de F&H. Relacionada a la hoja AUX FCIL.
 
-    Dim auxwb As Workbook
-    Dim AuxSheet As String
-    Dim RoutesSheetName As String
-    Dim Routei As Integer
-    Dim Routej As Integer
     Dim FCILSheetName As String
     
-    AuxSheet = ActiveSheet.Name
-    Set auxwb = ThisWorkbook
-    
-    RoutesSheetName = "Routes"
-    auxwb.Sheets(RoutesSheetName).Activate
-    
-    Routei = Sheets(RoutesSheetName).Range("A1:Z20").Find("EN45545 DDBB").Row                                    '= 2
-    Routej = Sheets(RoutesSheetName).Range("A1:Z20").Find("FULL ROUTE OF THE CONF. SHEET DOCUMENT").Column       'B = 2
-    
-    Workbooks.Open (Sheets(RoutesSheetName).Cells(Routei, Routej).Value)
-    
-    wb_OG = ActiveWorkbook.Name
-    FCILSheetName = "FCIL"
-    Set ws_OG = Workbooks(wb_OG).Sheets(FCILSheetName)
+    FCILSheetName = "AUX FCIL"
+    Set ws_OG = wb.Sheets(FCILSheetName)
     
     ws_OG.Activate
     
-    Aux = ws_OG.Range("A1:DA20").Find("Assembly Name").Row          '= 10
+    Auxi = Find_Row(0, "Supplier part number", FCILSheetName)
     
-    nprodj = ws_OG.Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Supplier part number").Column                            'N = 14
-    nombj = ws_OG.Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Part name").Column                                        'P = 16
-    matj = ws_OG.Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Raw material or product name*").Column                     'Q = 17
-    manufj = ws_OG.Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Manufacturer name*").Column                              'R = 18
+    nprodj = Find_Column(Auxi, "Supplier part number", FCILSheetName)
+    manufj = Find_Column(Auxi, "Manufacturer name*", FCILSheetName)
     
-    DateT6j = ws_OG.Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Date * T6").Column                                      'BW = 75
-    ManufDeclarationj = ws_OG.Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Manufacturer Declaration Date").Column        'CB = 80
-    GlobalStatusj = ws_OG.Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Certificate global status*").Column               'CD = 82
-    EmailSendedj = ws_OG.Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Email Sended").Column                              'CE = 83
-    TMexpirej = ws_OG.Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Test Method 1 time to expire*").Column                'CF = 84
-    ContactDBj = ws_OG.Range(Cells(Aux, 1), Cells(Aux, 100)).Find("Supplier's Contact").Column                          'CL = 90
-                                                                                                                        'EmailGen: contactj
-                                                                                                                        'Public contactj As Integer
-    N = ws_OG.Cells(Rows.Count, nprodj).End(xlUp).Row               '= 919
+    N = ws_OG.Cells(Rows.Count, nprodj).End(xlUp).Row
     
-    auxwb.Sheets(AuxSheet).Activate
+    ws_contact.Activate
     
 End Sub
+
+Function Find_Row(Column_Lim As Integer, Find_Me As String, Sheet As String) As Integer
+    
+    'Si Column_Lim = 0 quiere decir que aún no se ha localizado una línea de referencia para buscar los valores.
+    'Por lo que se usa un rango lo suficientemente grande como para encontrar la palabra clave.
+        
+    If Column_Lim = 0 Then
+    
+        Find_Row = Sheets(Sheet).Range("A1:DA20").Find(Find_Me).Row
+    
+    Else
+    
+        Find_Row = Sheets(Sheet).Range(Cells(1, Column_Lim), Cells(100, Column_Lim)).Find(Find_Me).Row
+        
+    End If
+    
+End Function
+
+Function Find_Column(Row_Lim As Integer, Find_Me As String, Sheet As String) As Integer
+    
+    'Si Row_Lim = 0 quiere decir que aún no se ha localizado una línea de referencia para buscar los valores.
+    'Por lo que se usa un rango lo suficientemente grande como para encontrar la palabra clave.
+        
+    If Row_Lim = 0 Then
+    
+        Find_Column = Sheets(Sheet).Range("A1:DA20").Find(Find_Me).Column
+    
+    Else
+    
+        Find_Column = Sheets(Sheet).Range(Cells(Row_Lim, 1), Cells(Row_Lim, 100)).Find(Find_Me).Column
+        
+    End If
+    
+End Function

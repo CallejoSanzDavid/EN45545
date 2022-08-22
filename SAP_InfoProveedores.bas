@@ -22,7 +22,7 @@ Sub SAP_InfoProveedores()
     Application.StatusBar = ""
     Application.ScreenUpdating = False
     
-    Call Locate_Positions_OG
+    Call Locate_Positions_CP
     
     'Borrar todos los filtros que haya aplicados
     Call ClearFilters
@@ -65,7 +65,7 @@ Function LocateSupplier(m As Integer, CPsupplier As String)
     InfoUpdated = 0
 
     ws_OG.Activate
-    Set c = Range(ws_OG.Cells(Aux + 1, manufj), ws_OG.Cells(N, manufj)).Find(CPsupplier)
+    Set c = Range(ws_OG.Cells(Auxi + 1, manufj), ws_OG.Cells(N, manufj)).Find(CPsupplier)
     
     If c Is Nothing Then 'No existe el proveedor en la BBDD de Contactos
 

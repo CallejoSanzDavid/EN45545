@@ -1,12 +1,7 @@
 Attribute VB_Name = "Filters"
-Option Explicit
-    
-    Public TableName As String
-    Public FilterSet As String
-    
 Sub ClearFilters()       'Borra todos los filtros.
 
-    If ActiveSheet.FilterMode Then ActiveSheet.ShowAllData
+    If Sheets(SheetName).FilterMode Then Sheets(SheetName).ShowAllData
 
 End Sub
 
@@ -15,7 +10,7 @@ End Sub
 'TableName = ActiveSheet.ListObjects(1).Name                'Selecciona el nombre de la primera tabla en la hoja activa.
 'FilterSet = Sheets(SheetName).Cells(i, j).Value            'Posición del encabezado donde aplicar el filtro.
 
-Sub AlfabeticOrder()     'Filtro: Ordenar en orden alfabético.
+Sub AlfabeticOrder(SheetName As String, TableName As String, FilterSet As String)       'Filtro: Ordenar en orden alfabético.
     
     On Error GoTo ErrorHandler:
     
@@ -36,4 +31,6 @@ ErrorHandler:
         On Error GoTo 0
 
 End Sub
+
+
 
