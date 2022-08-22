@@ -87,9 +87,9 @@ Sub Locate_Positions_PA(SheetName As String)
     
     PA_Statusj = Find_Column(PA_Starti, "ESTADO", PA_SheetName)
     'Obtiene la letra de la columna.
-    PA_StatusLetterj = Mid(ws_PA.Cells(1, PA_Statusj).Address, 2, InStr(2, ws_PA.Cells(1, PA_Statusj).Address, "$") - 2)         '= F
+    PA_StatusLetterj = Mid(ws_PA.Cells(PA_Starti, PA_Statusj).Address, 2, InStr(2, ws_PA.Cells(PA_Starti, PA_Statusj).Address, "$") - 2)         '= F
     
-    PA_Endi = ws_PA.Cells(Rows.Count, PA_Supplierj).End(xlUp).Row    '= 307
+    PA_Endi = ws_PA.Cells(Rows.Count, PA_Supplierj).End(xlUp).Row
     
     'Activa la hoja desde la que se inició la macro.
     Sheets(AuxSheet).Activate

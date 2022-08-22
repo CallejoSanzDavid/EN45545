@@ -9,6 +9,7 @@ Sub Data_Manager()
     Dim Day_Dif As Integer
     Dim PA_Status As String
                 
+    Application.StatusBar = ""
     Application.ScreenUpdating = False
     
     SheetName = ActiveSheet.Name
@@ -25,7 +26,7 @@ Sub Data_Manager()
     
     Select Case SheetName
                 
-        Case "EN CURSO"     '---CORRECTO---
+        Case "EN CURSO"
             
             For i = Starti + 1 To Endi
                 
@@ -33,6 +34,14 @@ Sub Data_Manager()
                 
                 Select Case Status
                 
+                    Case ""
+                    
+                        Exit For            'Con esto evitamos que se quede atascado en el bucle añadiendo líneas vacías
+                    
+                    Case "NOK"
+                    
+                        Call Delete_Row(i)
+                                        
                     Case "OK"
                         
                         If IsDate(Sheets(SheetName).Cells(i, LastMsgj)) = True Then                   'Error: en la celda no hay una fecha
@@ -42,7 +51,7 @@ Sub Data_Manager()
                             
                             If Day_Dif >= 7 Then           'Cortar y pegar si cumple.
                         
-                                Call Cut_Paste(SheetName, Status, i, AdActj)
+                                Call Move_Line(SheetName, Status, i, AdActj)
                                 
                             End If
                             
@@ -53,27 +62,19 @@ Sub Data_Manager()
                         If Sheets(SheetName).Cells(i, AdActj + 2).Value <> 1 Then                    'Copiar y pegar si cumple en POR ARCHIVAR.
                             
                             Call Locate_Positions_PA(SheetName)
-                            Call PA_Copy_Paste(SheetName, Status, i)
+                            Call Move_Line(SheetName, Status, i, Supplierj)
                         
                         End If
                     
                     Case "NO EN45545"
                         
-                        Call Cut_Paste(SheetName, Status, i, AdActj)
-                    
-                    Case "NOK"
-                    
-                        Call Delete_Row(i)
-                        
-                    Case ""
-                    
-                        Exit For            'Con esto evitamos que se quede atascado en el bucle añadiendo líneas vacías
+                        Call Move_Line(SheetName, Status, i, AdActj)
                         
                 End Select
                         
             Next
 
-        Case "POR ARCHIVAR"                 '---CORRECTO---
+        Case "POR ARCHIVAR"
             
             For i = PA_Starti + 1 To PA_Endi
     
@@ -81,24 +82,24 @@ Sub Data_Manager()
                                 
                 Select Case PA_Status
                 
-                    Case "OK"
+                    Case ""
 
-                        Call Update_Status(i, "EN CURSO", SheetName)
-                        Call Cut_Paste(SheetName, "ARCHIVADOS", i, PA_Statusj)
+                        Exit For            'Con esto evitamos que se quede atascado en el bucle añadiendo líneas vacías
                     
                     Case "NOK"
                     
                         Call Delete_Row(i)
                     
-                    Case ""
+                    Case "OK"
 
-                        Exit For            'Con esto evitamos que se quede atascado en el bucle añadiendo líneas vacías
-                
+                        Call Update_Status(i, SheetName)
+                        Call Move_Line(SheetName, "ARCHIVADOS", i, PA_Statusj)
+                                        
                 End Select
                 
             Next
 
-        Case "OK", "NO EN45545"         '---CORRECTO---
+        Case "OK", "NO EN45545", "TEMP"
             
             For i = Starti + 1 To Endi
                 
@@ -114,127 +115,85 @@ Sub Data_Manager()
                 
                         Call Delete_Row(i)
 
-                    Case SheetName
+                    Case SheetName, "---"
                     'Si coincide el estado con el nombre de la hoja no se hace nada
                     
                     Case "OK", "NO EN45545"
                     'Si estamos en la hoja OK y el estado es NO EN45545 se mueve directamente a la hoja NO EN45545.
                     'Si estamos en la hoja NO EN45545 y el estado es OK se mueve directamente a la hoja OK.
-                        Call Cut_Paste(SheetName, Status, i, AdActj)
+                        Call Move_Line(SheetName, Status, i, AdActj)
                     
                     Case Else
                         
-                        Call Cut_Paste(SheetName, "EN CURSO", i, AdActj)
+                        Call Move_Line(SheetName, "EN CURSO", i, AdActj)
                     
                 End Select
 
-            Next
-'<------------------STOP
-        Case "TEMP"
-            
-            For i = Starti + 1 To Endi
-                
-                Status = Sheets(SheetName).Cells(i, Statusj).Value
-                
-                Select Case Status
-                    
-                    Case ""
-                        
-                        Exit For            'Con esto evitamos que se quede atascado en el bucle añadiendo líneas vacías
-                    
-                    Case "---"
-                    
-                    Case "NOK"
-                
-                        Call Delete_Row(i)
-                    
-                    Case "OK", "NO EN45545"
-                        
-                        Call Cut_Paste(SheetName, Status, i, AdActj)
-                    
-                    Case Else
-                    
-                        Call Cut_Paste(SheetName, "EN CURSO", i, AdActj)
-                    
-                End Select
-                
             Next
 
     End Select
-'<------------------STOP
+
     Application.ScreenUpdating = True
                         
 End Sub
                        
-Function Cut_Paste(SheetName As String, Status As String, i As Integer, Lastj As Integer)        '---CORRECTO---
-'Corta y pega cualquier línea de información
+Function Move_Line(SheetName As String, Status As String, i As Integer, Lastj As Integer)
+'Mueve de una hoja a otra cualquier línea de información.
     
     Dim AuxEndi As Integer
     
-    Sheets(SheetName).Range(Cells(i, PartNumj), Cells(i, Lastj)).Cut
+    If Status = "POR ARCHIVAR" Then
+        Sheets(SheetName).Range(Cells(i, PartNumj), Cells(i, Lastj)).Copy
+    Else
+        Sheets(SheetName).Range(Cells(i, PartNumj), Cells(i, Lastj)).Cut
+    End If
     
     Sheets(Status).Activate
     AuxEndi = Sheets(Status).Cells(Rows.Count, PartNumj).End(xlUp).Row + 1
     Cells(AuxEndi, "A").Select
     ActiveSheet.Paste
     
-    'Ampliamos el rango de la tabla para que añada la nueva línea
-    ActiveSheet.ListObjects(1).Resize Range(Cells(Starti, PartNumj), Cells(AuxEndi, Lastj))
+    'Ampliamos el rango de la tabla para que añada la nueva línea.
+    If Status = "POR ARCHIVAR" Then
+        ActiveSheet.ListObjects(1).Resize Range(Cells(PA_Starti, PA_PartNumj), Cells(AuxEndi, PA_Statusj))
+        Sheets("AUX2").Range("C1").Copy Destination:=Sheets("POR ARCHIVAR").Range(PA_StatusLetterj & AuxEndi)    'Lista de validación: "PENDIENTE".
+    Else
+        ActiveSheet.ListObjects(1).Resize Range(Cells(Starti, PartNumj), Cells(AuxEndi, Lastj))
+    End If
     
     Sheets(SheetName).Activate
     
-    Call Delete_Row(i)
+    If Status = "POR ARCHIVAR" Then
+        'Marca que indica que la línea ya se ha movido a la hoja "POR ARCHIVAR" anteriormente.
+        Sheets(SheetName).Cells(i, AdActj + 2).Value = 1
+    Else
+        Call Delete_Row(i)
+    End If
     
 End Function
 
-Function Delete_Row(i As Integer)           '---CORRECTO---
+Function Delete_Row(i As Integer)
 
     ActiveSheet.Cells(i, 1).EntireRow.Delete
     i = i - 1
 
 End Function
 
-Function PA_Copy_Paste(SheetName As String, Status As String, i As Integer)
-'Copia y pega información a la hoja "POR ARCHIVAR".
-'Esta hoja no tiene tantos campos como el resto de hojas, por eso requiere una función especial
-    
-    Dim AuxEndi As Integer
-    
-    Sheets(SheetName).Range(Cells(i, PartNumj), Cells(i, Supplierj)).Copy
-    
-    Sheets(Status).Activate
-    
-    AuxEndi = Sheets(Status).Cells(Rows.Count, PartNumj).End(xlUp).Row + 1
-    Range("A" & AuxEndi).Select
-    ActiveSheet.Paste
-    
-    'Ampliamos el rango de la tabla para que añada la nueva línea.
-    ActiveSheet.ListObjects(1).Resize Range(Cells(PA_Starti, PA_PartNumj), Cells(AuxEndi, PA_Statusj))
-    
-    Sheets("AUX2").Range("C1").Copy Sheets("POR ARCHIVAR").Range(PA_StatusLetterj & AuxEndi)            'Lista de validación: "PENDIENTE".
-    
-    Sheets(SheetName).Activate
-    
-    'Marca que indica que la línea ya se ha movido a la hoja "POR ARCHIVAR" anteriormente.
-    Sheets(SheetName).Cells(i, AdActj + 2).Value = 1
-
-End Function
-
-Function Update_Status(i As Integer, Update_Sheet As String, SheetName As String)       '---CORRECTO---
+Function Update_Status(i As Integer, SheetName As String)
     
     Dim PartNum As String
 
     PA_PartNum = ws_PA.Cells(i, PA_PartNumj)
     
-    Sheets(Update_Sheet).Activate
+    Sheets("EN CURSO").Activate
     
-    Call Locate_Positions_OG(Update_Sheet)
+    Call Locate_Positions_OG("EN CURSO")
     
-    Set c = Range(Sheets(Update_Sheet).Cells(Starti, PartNumj), Sheets(Update_Sheet).Cells(Endi, PartNumj)).Find(PA_PartNum)
+    Set c = Range(Sheets("EN CURSO").Cells(Starti, PartNumj), Sheets("EN CURSO").Cells(Endi, PartNumj)).Find(PA_PartNum)
 
     If Not c Is Nothing Then
         
-        Sheets("AUX2").Range("B1").Copy Sheets(Update_Sheet).Cells(c.Row, Statusj)      'Lista de validación "OK"
+        Sheets("AUX2").Range("B1").Copy Sheets("EN CURSO").Cells(c.Row, Statusj)      'Lista de validación "OK"
                                                                                         
     End If
     
