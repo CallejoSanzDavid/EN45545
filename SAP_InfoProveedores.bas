@@ -10,7 +10,12 @@ Sub SAP_InfoProveedores()
     Dim Language As String
     Dim m As Integer
     Dim a As Integer
-        
+    
+    Application.StatusBar = ""
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False       'Desactiva las alertas
+    Application.EnableEvents = False
+    
     a = MsgBox("Para el correcto funcionamiento de la función, asegúrese de estar registrado en SAP y tener la ventana inicial abierta (SAP Easy Access)." + vbCrLf + vbCrLf + "Para evitar interrupciones en el programa, pulse el último icono de la parte superior y seleccione 'Options...'. Dentro de 'Accesibility & Scripting' > 'Scripting' > 'User Settings' deseleccione las notificaciones. Deje activa la opción 'Enable scripting'.", vbOKCancel)
     
     If a = 2 Then
@@ -49,9 +54,12 @@ Sub SAP_InfoProveedores()
         
     Next
     
-    Application.StatusBar = ""
     On Error GoTo 0
+    
+    Application.StatusBar = ""
     Application.ScreenUpdating = True
+    Application.DisplayAlerts = True
+    Application.EnableEvents = True
     
 End Sub
 
@@ -405,3 +413,4 @@ Function FillInfo(m As Integer)
         
 End Function
 
+                                                                                                                                                                                                                                                                                                                                                                                                     
