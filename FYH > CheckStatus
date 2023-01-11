@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-01-11T19:30:26.987Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36" etag="wDdN5qRRrOny3JO5LNH5" version="20.7.4" type="github">
+<mxfile host="app.diagrams.net" modified="2023-01-11T19:36:23.263Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36" etag="g3P1dOBRaxS2il8PxCfn" version="20.7.4" type="github">
   <diagram id="NOj_7Xc18HMP76qurIRd" name="Page-1">
     <mxGraphModel dx="1674" dy="764" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -101,7 +101,7 @@
         <mxCell id="EKN0ws5hGO8Cpi26EmJK-39" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="EKN0ws5hGO8Cpi26EmJK-35" target="EKN0ws5hGO8Cpi26EmJK-38" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="EKN0ws5hGO8Cpi26EmJK-35" value="Llamada a&lt;br&gt;&lt;i&gt;Log_Status&lt;br&gt;&lt;/i&gt;para Test i&lt;i&gt;&lt;br&gt;&lt;/i&gt;" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
+        <mxCell id="EKN0ws5hGO8Cpi26EmJK-35" value="Llamada a&lt;br&gt;&lt;i&gt;Log_Status&lt;/i&gt;&lt;i&gt;&lt;br&gt;&lt;/i&gt;" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="225" y="400" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="EKN0ws5hGO8Cpi26EmJK-41" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;" parent="1" source="EKN0ws5hGO8Cpi26EmJK-38" target="EKN0ws5hGO8Cpi26EmJK-40" edge="1">
@@ -133,16 +133,16 @@
           <mxGeometry x="474" y="470" width="40" height="30" as="geometry" />
         </mxCell>
         <mxCell id="p9wvO2D7qi-Id99_n8W8-1" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.4_point_star_2;dx=0.8;" vertex="1" parent="1">
-          <mxGeometry x="774" y="44" width="28" height="28" as="geometry" />
+          <mxGeometry x="776" y="42" width="28" height="28" as="geometry" />
         </mxCell>
         <mxCell id="p9wvO2D7qi-Id99_n8W8-2" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.4_point_star_2;dx=0.8;" vertex="1" parent="1">
-          <mxGeometry x="144" y="28" width="28" height="28" as="geometry" />
+          <mxGeometry x="146" y="26" width="28" height="28" as="geometry" />
         </mxCell>
         <mxCell id="p9wvO2D7qi-Id99_n8W8-3" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.6_point_star" vertex="1" parent="1">
-          <mxGeometry x="411" y="505" width="21" height="17" as="geometry" />
+          <mxGeometry x="409" y="502" width="21" height="17" as="geometry" />
         </mxCell>
         <mxCell id="p9wvO2D7qi-Id99_n8W8-4" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.6_point_star" vertex="1" parent="1">
-          <mxGeometry x="595" y="287" width="21" height="17" as="geometry" />
+          <mxGeometry x="594" y="284" width="21" height="17" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
